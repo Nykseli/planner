@@ -15,6 +15,7 @@ const PaddingSquare = ({ front, last }: { front: boolean, last?: boolean }) => {
     _style = { ..._style, borderTopWidth: borderWidth };
   else if (last)
     _style = { ..._style, borderRightWidth: borderWidth };
+
   return (
     <View style={_style}></View>
   );
@@ -41,9 +42,7 @@ const DaySquare = ({ date, isSunday, isToday, isInFirstWeek }:
   );
 }
 
-const DateSquares = () => {
-  const cdi = new CurrentDateInfo();
-  const cmi = new CurrentMonthInfo();
+const DateSquares = ({ cdi, cmi }: { cdi: CurrentDateInfo, cmi: CurrentMonthInfo }) => {
 
   // TODO: should paddings show info from previous and next month?
   const frontPaddingList = Array.from(
@@ -77,16 +76,39 @@ const DayNames = () => {
 
   return (
     <View style={styles.squaresContainer}>
-      {names.map((dName) => <Text style={styles.dayText}>{dName}</Text>)}
+      {names.map((dName) => <Text key={dName} style={styles.dayText}>{dName}</Text>)}
+    </View>
+  );
+}
+
+const DateInfo = ({ cdi }: { cdi: CurrentDateInfo }) => {
+  // TODO: i18n
+  const days = ['Maanantai', 'Tiistai', 'Keskiviikko', 'Torstai', 'Perjantai', 'Lauantai', 'Sunnuntai'];
+  const months = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+  const dateNums = `${cdi.date}.${cdi.month}.${cdi.year}`;
+  const dateStr = `${days[cdi.weekday - 1]}, ${months[cdi.month - 1]}kuu`;
+
+  return (
+    <View style={styles.monthInfoContainer}>
+      <Text style={styles.monthInfoText}>{dateNums}</Text>
+      <Text style={styles.monthInfoText}>{dateStr}</Text>
     </View>
   );
 }
 
 const MonthlyViewScreen = () => {
+  const cdi = new CurrentDateInfo();
+  const cmi = new CurrentMonthInfo();
+
   return (
     <View style={styles.monthContainer}>
-      <DayNames />
-      <DateSquares />
+      <View style={styles.dateInfoContainer}>
+        <DateInfo cdi={cdi} />
+      </View>
+      <View style={styles.dateSquareContainer}>
+        <DayNames />
+        <DateSquares cdi={cdi} cmi={cmi} />
+      </View>
     </View>
   );
 }
@@ -108,12 +130,30 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
     borderTopWidth: 0,
   },
+  dateInfoContainer: {
+    flex: 1.2,
+    alignContent: 'center',
+    flexDirection: 'column',
+    flexWrap: 'wrap'
+  },
+  dateSquareContainer: {
+    flex: 2.5,
+    flexDirection: 'column'
+  },
   monthContainer: {
     flex: 1,
     alignItems: 'flex-start',
     alignContent: 'center',
-    flexDirection: 'row',
+    flexDirection: 'column',
     flexWrap: 'wrap'
+  },
+  monthInfoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  monthInfoText: {
+    textAlign: 'center',
+    fontSize: Layout.window.width * 0.08
   },
   squaresContainer: {
     flexDirection: 'row',
