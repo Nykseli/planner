@@ -10,9 +10,9 @@ import * as React from 'react';
 
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
-import TabOneScreen from '@/screens/TabOneScreen';
+import MonthlyViewScreen from '@/screens/MonthlyViewScreen';
 import TabTwoScreen from '@/screens/TabTwoScreen';
-import { BottomTabParamList, TabOneParamList, TabTwoParamList } from '@/types';
+import { BottomTabParamList, MonthlyViewParamList, TabTwoParamList } from '@/types';
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -21,11 +21,11 @@ const BottomTabNavigator = () => {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="MonthlyView"
       tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}>
       <BottomTab.Screen
-        name="TabOne"
-        component={TabOneNavigator}
+        name="MonthlyView"
+        component={MonthlyViewNavigator}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
         }}
@@ -49,17 +49,17 @@ const TabBarIcon = (props: { name: React.ComponentProps<typeof Ionicons>['name']
 
 // Each tab has its own navigation stack, you can read more about this pattern here:
 // https://reactnavigation.org/docs/tab-based-navigation#a-stack-navigator-for-each-tab
-const TabOneStack = createStackNavigator<TabOneParamList>();
+const MonthlyViewStack = createStackNavigator<MonthlyViewParamList>();
 
-const TabOneNavigator = () => {
+const MonthlyViewNavigator = () => {
   return (
-    <TabOneStack.Navigator>
-      <TabOneStack.Screen
-        name="TabOneScreen"
-        component={TabOneScreen}
-        options={{ headerTitle: 'Tab One Title' }}
+    <MonthlyViewStack.Navigator>
+      <MonthlyViewStack.Screen
+        name="MonthlyViewScreen"
+        component={MonthlyViewScreen}
+        options={{ headerTitle: 'Monthly View' }}
       />
-    </TabOneStack.Navigator>
+    </MonthlyViewStack.Navigator>
   );
 }
 

@@ -9,12 +9,12 @@ export type RootStackParamList = {
 };
 
 export type BottomTabParamList = {
-  TabOne: undefined;
+  MonthlyView: undefined;
   TabTwo: undefined;
 };
 
-export type TabOneParamList = {
-  TabOneScreen: undefined;
+export type MonthlyViewParamList = {
+  MonthlyViewScreen: undefined;
 };
 
 export type TabTwoParamList = {
