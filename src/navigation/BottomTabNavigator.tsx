@@ -11,8 +11,8 @@ import * as React from 'react';
 import Colors from '@/constants/Colors';
 import useColorScheme from '@/hooks/useColorScheme';
 import MonthlyViewScreen from '@/screens/MonthlyViewScreen';
-import TabTwoScreen from '@/screens/TabTwoScreen';
-import { BottomTabParamList, MonthlyViewParamList, TabTwoParamList } from '@/types';
+import DailyViewScreen from '@/screens/DailyViewScreen';
+import { BottomTabParamList, MonthlyViewParamList, DailyViewParamList } from '@/types';
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -24,15 +24,15 @@ const BottomTabNavigator = () => {
       initialRouteName="MonthlyView"
       tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}>
       <BottomTab.Screen
-        name="MonthlyView"
-        component={MonthlyViewNavigator}
+        name="DailyView"
+        component={DailyViewNavigator}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
         }}
       />
       <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoNavigator}
+        name="MonthlyView"
+        component={MonthlyViewNavigator}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
         }}
@@ -63,17 +63,17 @@ const MonthlyViewNavigator = () => {
   );
 }
 
-const TabTwoStack = createStackNavigator<TabTwoParamList>();
+const DailyViewStack = createStackNavigator<DailyViewParamList>();
 
-const TabTwoNavigator = () => {
+const DailyViewNavigator = () => {
   return (
-    <TabTwoStack.Navigator>
-      <TabTwoStack.Screen
-        name="TabTwoScreen"
-        component={TabTwoScreen}
-        options={{ headerTitle: 'Tab Two Title' }}
+    <DailyViewStack.Navigator>
+      <DailyViewStack.Screen
+        name="DailyViewScreen"
+        component={DailyViewScreen}
+        options={{ headerTitle: 'Daily View' }}
       />
-    </TabTwoStack.Navigator>
+    </DailyViewStack.Navigator>
   );
 }
 

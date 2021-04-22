@@ -22,6 +22,13 @@ class CurrentDateInfo {
     this.month = date.getMonth() + 1;
     this.year = date.getFullYear();
   }
+
+  public currentDateString(): string {
+    const d = timeDateFmt(this.date);
+    const m = timeDateFmt(this.month);
+
+    return `${d}.${m}.${this.year}`
+  }
 }
 
 class CurrentMonthInfo {
@@ -82,8 +89,19 @@ class CurrentMonthInfo {
 
 }
 
+/**
+ * Return 0 padded string if number < 10
+ *
+ * eg  8 => "08"
+ *    10 => "10"
+ */
+const timeDateFmt = (td: number): string => {
+  return `${td < 10 ? '0' + td : td}`;
+}
 
 export {
   CurrentDateInfo,
-  CurrentMonthInfo
+  CurrentMonthInfo,
+
+  timeDateFmt
 }
