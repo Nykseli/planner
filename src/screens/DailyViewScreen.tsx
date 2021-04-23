@@ -2,7 +2,9 @@ import * as React from 'react';
 import { StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import TaskItemModal from '@/components/TaskItemModal'
 import Layout from '@/constants/Layout';
+import Colors from '@/constants/Colors';
 import { CurrentDateInfo, timeDateFmt } from '@/util/datetime';
 
 const singleBoxHeight = 80;
@@ -29,7 +31,9 @@ const ScrollBoxItem = ({ hour, minute }: { hour: number, minute: number }) => {
 
   return (
     <View style={{ marginTop: position, ...styles.scrollBoxItem }}>
-      <Text>{`Here is the title of ${hour}:${minute} appointment`}</Text>
+      <TaskItemModal>
+        <Text>{`Here is the title of ${timeDateFmt(hour)}:${timeDateFmt(minute)} appointment`}</Text>
+      </TaskItemModal>
     </View>
   );
 }
@@ -45,6 +49,7 @@ const ScrollBoxes = () => {
       <ScrollBoxItem hour={15} minute={30} />
       <ScrollBoxItem hour={0} minute={15} />
       <ScrollBoxItem hour={2} minute={30} />
+      <ScrollBoxItem hour={1} minute={0} />
     </View>
   );
 }
@@ -121,7 +126,8 @@ const styles = StyleSheet.create({
   },
   scrollBoxItem: {
     height: 28,
-    backgroundColor: '#d3d3ffd0',
+    backgroundColor: Colors.seeThrough,
+    // backgroundColor: '#d3d3ffd0',
     position: 'absolute',
     width: Layout.window.width * 0.8,
     alignContent: 'center',

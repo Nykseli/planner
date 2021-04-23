@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import Layout from '@/constants/Layout'
 import { CurrentMonthInfo, CurrentDateInfo } from '@/util/datetime'
+import Colors from '@/constants/Colors';
 
 const squareWidth = Layout.window.width / 7;
 const borderWidth = 3;
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
     height: squareWidth,
     borderColor: "lightblue",
     borderStyle: "solid",
-    backgroundColor: "#00000000",
+    backgroundColor: Colors.seeThrough,
     borderRightWidth: 0,
     borderTopWidth: 0,
   },
