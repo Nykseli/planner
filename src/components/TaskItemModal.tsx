@@ -1,38 +1,176 @@
 import React from 'react';
-import { AntDesign, Feather } from '@expo/vector-icons';
-import { Alert, StyleSheet, Modal, Pressable, Platform } from 'react-native';
+import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
+import { Alert, Button, StyleSheet, Modal, Platform, Pressable, TextInput } from 'react-native';
+import DateTimePicker, { AndroidNativeProps, Event } from '@react-native-community/datetimepicker';
 
 import Colors from '@/constants/Colors';
-import { MonoText } from './StyledText';
 import { Text, View } from './Themed';
 import Layout from '@/constants/Layout';
 
-interface ITaskItemModal {
-  children: React.ReactChild | React.ReactChildren
-}
-
 type VisibiltyCb = (bool?: boolean) => void;
 
+interface ITaskItemModal {
+  children: React.ReactChild | React.ReactChild[] | React.ReactChildren
+}
 
-const ModalControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) => {
+interface IFullScreenModalView {
+  children: React.ReactChild | React.ReactChild[] | React.ReactChildren,
+  visible: boolean,
+  visibilityCb: VisibiltyCb,
+}
+
+const FullScreenModalView = (props: IFullScreenModalView) => {
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={props.visible}
+      onRequestClose={() => {
+        props.visibilityCb(!props.visible);
+      }}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalView}>
+          {props.children}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const EditControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) => {
   return (
     <View style={styles.controlButtons}>
       <View style={styles.controlLeftButtons}>
         <Pressable
           style={styles.controlButton}
-          onPress={() => visibilityCb()} >
+          onPress={() => visibilityCb(false)} >
           <AntDesign name="close" size={34} />
         </Pressable>
       </View>
       <View style={styles.controlRightButtons}>
         <Pressable
           style={styles.controlButton}
-          /* TODO: edit modal onPress={() => visibilityCb()} */ >
+          /* TODO: actually update the task onPress={() => save()} */>
+          <MaterialIcons name="done" size={34} />
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const EditFields = () => {
+  const [title, onChangeTitle] = React.useState<string>("Title lorem");
+  const [description, onChangeDescription] = React.useState<string>("Description...");
+  const [date, setDate] = React.useState<Date>(new Date());
+  // Both AndroidNativeProps and IOSNativeProps modes contain "date" and "time"
+  const [pickerMode, setPickerMode] = React.useState<AndroidNativeProps['mode']>('date');
+  const [showPicker, setShowPicker] = React.useState<boolean>(false);
+
+  const onDateChange = (event: Event, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    setShowPicker(Platform.OS === 'ios');
+    setDate(currentDate);
+  }
+
+  const showMode = (currentMode: AndroidNativeProps['mode']) => {
+    setShowPicker(true);
+    setPickerMode(currentMode);
+  }
+
+  const showDatepicker = () => {
+    showMode('date');
+  }
+
+  const showTimepicker = () => {
+    showMode('time');
+  }
+
+  return (
+    <View style={styles.editForm}>
+      <View style={styles.editInputView}>
+        <TextInput
+          style={styles.editTextInput}
+          onChangeText={onChangeTitle}
+          value={title}
+        />
+      </View>
+      <View style={styles.editInputView}>
+        {/* TODO: How do we edit the description */}
+        <TextInput
+          style={styles.editTextInput}
+          onChangeText={onChangeDescription}
+          value={description}
+        />
+      </View>
+      <Pressable onPress={showDatepicker}>
+        <View style={styles.editDateView}>
+          <Feather name="edit-3" size={25} />
+          {/* TODO: date range? */}
+          <Text style={styles.editDateText}>21.04.2021</Text>
+        </View>
+      </Pressable>
+      <Pressable onPress={showTimepicker}>
+        <View style={styles.editDateView}>
+          <Feather name="edit-3" size={25} />
+          <Text style={styles.editDateText}>17.00 - 18.00</Text>
+        </View>
+      </Pressable>
+      {showPicker && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={date}
+          mode={pickerMode}
+          is24Hour={true}
+          display="default"
+          onChange={onDateChange}
+        />
+      )}
+    </View>
+  );
+}
+
+const ModalControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) => {
+  const [editVisible, setEditVisible] = React.useState<boolean>(false);
+
+  const changeEditVisiblity = (b?: boolean) => {
+    if (b === undefined) {
+      setEditVisible(!editVisible);
+    } else {
+      setEditVisible(Boolean(b));
+    }
+  }
+
+  return (
+    <View style={styles.controlButtons}>
+      <FullScreenModalView visible={editVisible} visibilityCb={changeEditVisiblity}>
+        <EditControlButtons visibilityCb={changeEditVisiblity} />
+        <EditFields />
+      </FullScreenModalView>
+      <View style={styles.controlLeftButtons}>
+        <Pressable
+          style={styles.controlButton}
+          onPress={() => visibilityCb(false)} >
+          <AntDesign name="close" size={34} />
+        </Pressable>
+      </View>
+      <View style={styles.controlRightButtons}>
+        <Pressable
+          style={styles.controlButton}
+          onPress={() => changeEditVisiblity(true)} >
           <Feather name="edit-3" size={34} />
         </Pressable>
         <Pressable
           style={styles.controlButton}
-          /* TODO: confirm delete onPress={() => visibilityCb()} */ >
+          onPress={() => Alert.alert(
+            "Delete task?",
+            "This deletion cannot be reversed",
+            [
+              // TODO: onPress functionality
+              // TODO: Should delete text be bold and red?
+              { text: "Delete" },
+              { text: "Cancel" }
+            ]
+          )}>
           <AntDesign name="delete" size={34} />
         </Pressable>
       </View>
@@ -61,17 +199,6 @@ const TaskItemInfo = () => {
   );
 }
 
-const ItemModalView = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) => {
-  return (
-    <View style={styles.modalContainer}>
-      <View style={styles.modalView}>
-        <ModalControlButtons visibilityCb={visibilityCb} />
-        <TaskItemInfo />
-      </View>
-    </View>
-  );
-}
-
 // TODO: use reducer to show the information?
 const TaskItemModal = (props: ITaskItemModal) => {
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
@@ -82,22 +209,14 @@ const TaskItemModal = (props: ITaskItemModal) => {
     } else {
       setModalVisible(Boolean(b));
     }
-
   }
 
   return (
     <View style={styles.centeredView}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          changeVisiblity(!modalVisible);
-        }}
-      >
-        <ItemModalView visibilityCb={changeVisiblity} />
-      </Modal>
+      <FullScreenModalView visibilityCb={changeVisiblity} visible={modalVisible}>
+        <ModalControlButtons visibilityCb={changeVisiblity} />
+        <TaskItemInfo />
+      </FullScreenModalView>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
         onPress={() => changeVisiblity(true)}
@@ -132,6 +251,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end'
   },
+  editForm: {
+    paddingTop: 30,
+  },
+  editDateView: {
+    paddingBottom: 15,
+    flexDirection: 'row'
+  },
+  editDateText: {
+    paddingLeft: 10,
+    fontSize: 16,
+  },
+  editInputView: {
+    paddingBottom: 15
+  },
+  editTextInput: {
+    borderBottomWidth: 1,
+    fontSize: 16,
+  },
   itemInfo: {
     paddingTop: 30,
     paddingRight: 10,
@@ -153,17 +290,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    width: Layout.window.width,
-    height: Layout.window.height,
-    backgroundColor: Colors.seeThrough
+    width: Layout.screen.width,
+    height: Layout.screen.height,
+    backgroundColor: Colors.seeThrough,
+    // TODO: fix position workaround
+    // We have to set modalContainer's position as absolute, since the keyboard
+    // pushes the text fields out of the view otherwise.
+    // This is seems to be a problem specificly with Modal view.
+    // "softwareKeyboardLayoutMode": "pan" in app.json fixes it in other views.
+    position: 'absolute'
   },
   modalView: {
-    width: Layout.window.width,
-    height: Layout.window.height,
+    width: Layout.screen.width,
+    height: Layout.screen.height,
     backgroundColor: "white",
-    borderRadius: 20,
     // TODO: make sure that all the items are visible with safe views etc
-    paddingTop: 35,
+    paddingTop: 20,
     paddingLeft: 15,
     paddingRight: 10,
   },
