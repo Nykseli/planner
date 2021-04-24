@@ -1,6 +1,6 @@
 import React from 'react';
 import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
-import { Alert, Button, StyleSheet, Modal, Platform, Pressable, TextInput } from 'react-native';
+import { Alert, StyleSheet, Modal, Platform, Pressable, TextInput } from 'react-native';
 import DateTimePicker, { AndroidNativeProps, Event } from '@react-native-community/datetimepicker';
 
 import Colors from '@/constants/Colors';
@@ -11,6 +11,11 @@ type VisibiltyCb = (bool?: boolean) => void;
 
 interface ITaskItemModal {
   children: React.ReactChild | React.ReactChild[] | React.ReactChildren
+}
+
+interface IEditTaskItemModal {
+  visible: boolean,
+  visibilityCb: VisibiltyCb,
 }
 
 interface IFullScreenModalView {
@@ -142,10 +147,7 @@ const ModalControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) =>
 
   return (
     <View style={styles.controlButtons}>
-      <FullScreenModalView visible={editVisible} visibilityCb={changeEditVisiblity}>
-        <EditControlButtons visibilityCb={changeEditVisiblity} />
-        <EditFields />
-      </FullScreenModalView>
+      <EditTaskItemModal visible={editVisible} visibilityCb={changeEditVisiblity} />
       <View style={styles.controlLeftButtons}>
         <Pressable
           style={styles.controlButton}
@@ -225,7 +227,15 @@ const TaskItemModal = (props: ITaskItemModal) => {
       </Pressable>
     </View>
   );
+}
 
+const EditTaskItemModal = (props: IEditTaskItemModal) => {
+  return (
+    <FullScreenModalView visible={props.visible} visibilityCb={props.visibilityCb}>
+      <EditControlButtons visibilityCb={props.visibilityCb} />
+      <EditFields />
+    </FullScreenModalView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -322,4 +332,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default TaskItemModal;
+export { TaskItemModal, EditTaskItemModal };

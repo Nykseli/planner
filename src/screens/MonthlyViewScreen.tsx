@@ -2,6 +2,7 @@ import * as React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import AddItemButton from '@/components/AddItemButton';
 import Layout from '@/constants/Layout'
 import { CurrentMonthInfo, CurrentDateInfo } from '@/util/datetime'
 import Colors from '@/constants/Colors';
@@ -110,6 +111,7 @@ const MonthlyViewScreen = () => {
         <DayNames />
         <DateSquares cdi={cdi} cmi={cmi} />
       </View>
+      <AddItemButton />
     </View>
   );
 }

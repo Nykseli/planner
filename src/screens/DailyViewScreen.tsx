@@ -2,7 +2,8 @@ import * as React from 'react';
 import { StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import TaskItemModal from '@/components/TaskItemModal'
+import { TaskItemModal } from '@/components/TaskItemModal'
+import AddItemButton from '@/components/AddItemButton';
 import Layout from '@/constants/Layout';
 import Colors from '@/constants/Colors';
 import { CurrentDateInfo, timeDateFmt } from '@/util/datetime';
@@ -75,6 +76,7 @@ const DailyViewScreen = () => {
           <ScrollItems />
         </ScrollView>
       </SafeAreaView>
+      <AddItemButton />
     </View>
   );
 }
