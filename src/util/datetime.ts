@@ -18,3 +18,15 @@ export type YearNum = number;
 export const timeDateFmt = (td: number): string => {
   return `${td < 10 ? '0' + td : td}`;
 }
+
+/**
+ * In js Date object, week days are from 0 to 6
+ * and WeekNum is 1 to 7
+ */
+export const jsWeekDayToWeekNum = (day: number): WeekNum => {
+  let weekday = day;
+  if (weekday == 0)
+    weekday = 7;
+
+  return weekday as WeekNum;
+}

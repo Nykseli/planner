@@ -1,7 +1,7 @@
 /**
  * dataObjects.ts contains object representation of database objects
  */
-import { DateNum, MonthNum, WeekNum, YearNum, timeDateFmt } from '@/util/datetime'
+import { DateNum, MonthNum, WeekNum, YearNum, timeDateFmt, jsWeekDayToWeekNum } from '@/util/datetime'
 
 abstract class Serializable<I> {
   public abstract serialize(): I;
@@ -54,12 +54,8 @@ export class DateInfo implements IDateInfo, Serializable<IDateInfo> {
   }
 
   private static fromDate(date: Date): DateInfo {
-    let _weekday = date.getDay();
-    if (_weekday == 0)
-      _weekday = 7;
-
     const d = date.getDate() as DateNum;
-    const weekday = _weekday as WeekNum;
+    const weekday = jsWeekDayToWeekNum(date.getDay());
     // getMonth returns (0-11) and we want (1-12)
     const month = date.getMonth() + 1 as MonthNum;
     const year = date.getFullYear() as YearNum;
@@ -185,8 +181,8 @@ export class MonthInfo implements IMonthInfo, Serializable<IMonthInfo> {
     const firstDay = new Date(y, m, 1);
     const lastDay = new Date(y, m + 1, 0);
 
-    const startWeekday = firstDay.getDay() as WeekNum;
-    const endWeekday = lastDay.getDay() as WeekNum;
+    const startWeekday = jsWeekDayToWeekNum(firstDay.getDay());
+    const endWeekday = jsWeekDayToWeekNum(lastDay.getDay());
     const endDate = lastDay.getDate() as MonthNum;
     const year = y as YearNum;
     // getMonth returns (0-11) and we want (1-12)
