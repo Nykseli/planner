@@ -1,12 +1,16 @@
 import * as React from 'react';
-import { StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { StyleSheet, SafeAreaView, ScrollView, Pressable } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { Text, View } from '@/components/Themed';
 import { TaskItemModal } from '@/components/TaskItemModal'
 import AddItemButton from '@/components/AddItemButton';
 import Layout from '@/constants/Layout';
 import Colors from '@/constants/Colors';
-import { CurrentDateInfo, timeDateFmt } from '@/util/datetime';
+import { DateInfo } from '@/data/dataObjects';
+import { timeDateFmt } from '@/util/datetime';
+import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
+import { selectDate, nextDate, previousDate } from '@/data/redux/reducers/currentDate';
 
 const singleBoxHeight = 80;
 const dailyHours = Array.from({ length: 24 }, (_v, k) => k);
@@ -66,11 +70,20 @@ const ScrollItems = () => {
 }
 
 const DailyViewScreen = () => {
-  const cdi = new CurrentDateInfo();
+  const currentDate = useAppSelector(selectDate);
+  const dispatch = useAppDispatch();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{cdi.currentDateString()}</Text>
+      <View style={styles.dateNavigation}>
+        <Pressable onPress={() => dispatch(previousDate())}>
+          <MaterialIcons name="navigate-before" size={35} color="black" />
+        </Pressable>
+        <Text style={styles.title}>{DateInfo.toString(currentDate)}</Text>
+        <Pressable onPress={() => dispatch(nextDate())}>
+          <MaterialIcons name="navigate-next" size={35} color="black" />
+        </Pressable>
+      </View>
       <SafeAreaView style={styles.scrollContainer}>
         <ScrollView style={styles.scrollView}>
           <ScrollItems />
@@ -85,6 +98,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+  },
+  dateNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   scrollContainer: {
     flex: 1,

@@ -4,7 +4,8 @@ import { StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import AddItemButton from '@/components/AddItemButton';
 import Layout from '@/constants/Layout'
-import { CurrentMonthInfo, CurrentDateInfo } from '@/util/datetime'
+import { DateInfo } from '@/data/dataObjects';
+import { CurrentMonthInfo } from '@/util/datetime';
 import Colors from '@/constants/Colors';
 
 const squareWidth = Layout.window.width / 7;
@@ -44,7 +45,7 @@ const DaySquare = ({ date, isSunday, isToday, isInFirstWeek }:
   );
 }
 
-const DateSquares = ({ cdi, cmi }: { cdi: CurrentDateInfo, cmi: CurrentMonthInfo }) => {
+const DateSquares = ({ cdi, cmi }: { cdi: DateInfo, cmi: CurrentMonthInfo }) => {
 
   // TODO: should paddings show info from previous and next month?
   const frontPaddingList = Array.from(
@@ -83,7 +84,7 @@ const DayNames = () => {
   );
 }
 
-const DateInfo = ({ cdi }: { cdi: CurrentDateInfo }) => {
+const DateInfoView = ({ cdi }: { cdi: DateInfo }) => {
   // TODO: i18n
   const days = ['Maanantai', 'Tiistai', 'Keskiviikko', 'Torstai', 'Perjantai', 'Lauantai', 'Sunnuntai'];
   const months = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
@@ -99,13 +100,13 @@ const DateInfo = ({ cdi }: { cdi: CurrentDateInfo }) => {
 }
 
 const MonthlyViewScreen = () => {
-  const cdi = new CurrentDateInfo();
+  const cdi = DateInfo.today();
   const cmi = new CurrentMonthInfo();
 
   return (
     <View style={styles.monthContainer}>
       <View style={styles.dateInfoContainer}>
-        <DateInfo cdi={cdi} />
+        <DateInfoView cdi={cdi} />
       </View>
       <View style={styles.dateSquareContainer}>
         <DayNames />

@@ -1,51 +1,15 @@
+import { MonthInfo } from "@/data/dataObjects";
 
-class CurrentDateInfo {
-  // The day of the month (1–31)
-  public date: number;
-  // The day of the week (1–7, monday-sunday)
-  public weekday: number;
-  // The month (1–12)
-  public month: number;
-  // The year (4 digits for 4-digit years)
-  public year: number;
+// Number representation of dates in month
+export type DateNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31;
+// Number representation of months
+export type MonthNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+// Number representation of week days (monday - sunday)
+export type WeekNum = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+// Year number for consistency
+export type YearNum = number;
 
-  constructor() {
-    const date = new Date();
-    // Transform sunday (0) to 7
-    let _weekday = date.getDay();
-    if (_weekday == 0)
-      _weekday = 7;
-
-    this.date = date.getDate();
-    this.weekday = _weekday;
-    // getMonth returns (0-11) and we want (1-12)
-    this.month = date.getMonth() + 1;
-    this.year = date.getFullYear();
-  }
-
-  public currentDateString(): string {
-    const d = timeDateFmt(this.date);
-    const m = timeDateFmt(this.month);
-
-    return `${d}.${m}.${this.year}`
-  }
-}
-
-class CurrentMonthInfo {
-  // Which day of the week is the first day of the month
-  // (1–7, monday-sunday)
-  public startWeekday: number;
-  // Which day of the week is the last day of the month
-  public endWeekday: number;
-  // Which is the last date (28-31) is the last of the month
-  public endDate: number;
-  // First day is always 1
-  public static readonly firstDay: number = 1;
-  // The month (1–12)
-  public month: number;
-  // The year (4 digits for 4-digit years)
-  public year: number;
-
+class CurrentMonthInfo extends MonthInfo {
 
   constructor() {
     const date = new Date();
@@ -54,12 +18,14 @@ class CurrentMonthInfo {
     const firstDay = new Date(y, m, 1);
     const lastDay = new Date(y, m + 1, 0);
 
-    this.startWeekday = firstDay.getDay();
-    this.endWeekday = lastDay.getDay();
-    this.endDate = lastDay.getDate();
-    this.year = y;
+    const startWeekday = firstDay.getDay() as WeekNum;
+    const endWeekday = lastDay.getDay() as WeekNum;
+    const endDate = lastDay.getDate() as MonthNum;
+    const year = y as YearNum;
     // getMonth returns (0-11) and we want (1-12)
-    this.month = m + 1;
+    const month = m + 1 as MonthNum;
+
+    super(year, month, endDate, endWeekday, startWeekday);
   }
 
   /**
@@ -81,7 +47,7 @@ class CurrentMonthInfo {
     return date <= daysInFirstWeek;
   }
 
-  public isToday(date: number, cDate: CurrentDateInfo): boolean {
+  public isToday(date: number, cDate: any): boolean {
     return date === cDate.date
       && this.year === cDate.year
       && this.month === cDate.month;
@@ -100,7 +66,7 @@ const timeDateFmt = (td: number): string => {
 }
 
 export {
-  CurrentDateInfo,
+
   CurrentMonthInfo,
 
   timeDateFmt
