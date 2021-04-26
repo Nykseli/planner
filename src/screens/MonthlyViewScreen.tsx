@@ -1,12 +1,15 @@
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { Text, View } from '@/components/Themed';
 import AddItemButton from '@/components/AddItemButton';
 import Layout from '@/constants/Layout'
-import { DateInfo } from '@/data/dataObjects';
-import { CurrentMonthInfo } from '@/util/datetime';
+import { DateInfo, MonthInfo } from '@/data/dataObjects';
 import Colors from '@/constants/Colors';
+import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
+import { selectMonth, nextMonth, previousMonth } from '@/data/redux/reducers/currentMonth';
+import { timeDateFmt } from '@/util/datetime';
 
 const squareWidth = Layout.window.width / 7;
 const borderWidth = 3;
@@ -45,7 +48,7 @@ const DaySquare = ({ date, isSunday, isToday, isInFirstWeek }:
   );
 }
 
-const DateSquares = ({ cdi, cmi }: { cdi: DateInfo, cmi: CurrentMonthInfo }) => {
+const DateSquares = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
 
   // TODO: should paddings show info from previous and next month?
   const frontPaddingList = Array.from(
@@ -84,12 +87,20 @@ const DayNames = () => {
   );
 }
 
-const DateInfoView = ({ cdi }: { cdi: DateInfo }) => {
+const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
   // TODO: i18n
   const days = ['Maanantai', 'Tiistai', 'Keskiviikko', 'Torstai', 'Perjantai', 'Lauantai', 'Sunnuntai'];
   const months = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-  const dateNums = `${cdi.date}.${cdi.month}.${cdi.year}`;
-  const dateStr = `${days[cdi.weekday - 1]}, ${months[cdi.month - 1]}kuu`;
+  let dateNums; //= `${cdi.date}.${cdi.month}.${cdi.year}`;
+  let dateStr; //= `${days[cdi.weekday - 1]}, ${months[cdi.month - 1]}kuu`;
+
+  if (cdi.month === cmi.month && cdi.year === cmi.year) {
+    dateNums = `${timeDateFmt(cdi.date)}.${timeDateFmt(cdi.month)}.${cdi.year}`;
+    dateStr = `${days[cdi.weekday - 1]}, ${months[cdi.month - 1]}kuu`;
+  } else {
+    dateNums = `${timeDateFmt(cmi.month)}.${cmi.year}`;
+    dateStr = `${months[cmi.month - 1]}kuu`;
+  }
 
   return (
     <View style={styles.monthInfoContainer}>
@@ -100,13 +111,23 @@ const DateInfoView = ({ cdi }: { cdi: DateInfo }) => {
 }
 
 const MonthlyViewScreen = () => {
+  const selectedMonth = useAppSelector(selectMonth);
+  const cmi = MonthInfo.deSerialize(selectedMonth);
   const cdi = DateInfo.today();
-  const cmi = new CurrentMonthInfo();
+  const dispatch = useAppDispatch();
 
   return (
     <View style={styles.monthContainer}>
       <View style={styles.dateInfoContainer}>
-        <DateInfoView cdi={cdi} />
+        <DateInfoView cdi={cdi} cmi={cmi} />
+      </View>
+      <View style={styles.dateNavigation}>
+        <Pressable onPress={() => dispatch(previousMonth())}>
+          <MaterialIcons name="navigate-before" size={35} color="black" />
+        </Pressable>
+        <Pressable onPress={() => dispatch(nextMonth())}>
+          <MaterialIcons name="navigate-next" size={35} color="black" />
+        </Pressable>
       </View>
       <View style={styles.dateSquareContainer}>
         <DayNames />
@@ -124,6 +145,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingBottom: 7
   },
+  dateNavigation: {
+    flex: 0.1,
+    width: Layout.window.width,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
   dateSquare: {
     borderWidth: borderWidth,
     width: squareWidth,
@@ -135,13 +164,13 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
   },
   dateInfoContainer: {
-    flex: 1.2,
+    flex: 1.0,
     alignContent: 'center',
     flexDirection: 'column',
     flexWrap: 'wrap'
   },
   dateSquareContainer: {
-    flex: 2.5,
+    flex: 3.0,
     flexDirection: 'column'
   },
   monthContainer: {

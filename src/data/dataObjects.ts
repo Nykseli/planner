@@ -96,8 +96,21 @@ export class DateInfo implements IDateInfo, Serializable<IDateInfo> {
   }
 }
 
+export interface IMonthInfo {
+  // Which day of the week is the first day of the month
+  // (1–7, monday-sunday)
+  startWeekday: WeekNum;
+  // Which day of the week is the last day of the month
+  endWeekday: WeekNum;
+  // Which is the last date (28-31) is the last of the month
+  endDate: MonthNum;
+  // The month (1–12)
+  month: MonthNum;
+  // The year (4 digits for 4-digit years)
+  year: YearNum;
+}
 
-export class MonthInfo {
+export class MonthInfo implements IMonthInfo, Serializable<IMonthInfo> {
   // Which day of the week is the first day of the month
   // (1–7, monday-sunday)
   public startWeekday: WeekNum;
@@ -125,5 +138,88 @@ export class MonthInfo {
     this.endDate = endDate;
     this.endWeekday = endWeekday;
     this.startWeekday = startWeekday;
+  }
+
+  /**
+  * List of numbers between 1 and endDate. Inclusive
+  */
+  public dateList(): Array<number> {
+    return Array.from({ length: this.endDate }, (_v, k) => k + 1);
+  }
+
+  public isSunday(date: number): boolean {
+    if (this.startWeekday === 1)
+      return date % 7 === 0;
+
+    return date % 7 === 8 - this.startWeekday;
+  }
+
+  public isInFirstWeek(date: number): boolean {
+    const daysInFirstWeek = 8 - this.startWeekday;
+    return date <= daysInFirstWeek;
+  }
+
+  public isToday(date: number, cDate: IDateInfo): boolean {
+    return date === cDate.date
+      && this.year === cDate.year
+      && this.month === cDate.month;
+  }
+
+  public serialize(): IMonthInfo {
+    return { ...this } as IMonthInfo;
+  }
+
+  public static deSerialize(iMonth: IMonthInfo): MonthInfo {
+    return new MonthInfo(
+      iMonth.year,
+      iMonth.month,
+      iMonth.endDate,
+      iMonth.endWeekday,
+      iMonth.startWeekday
+    );
+  }
+
+  private static fromDate(date: Date): MonthInfo {
+    const m = date.getMonth();
+    const y = date.getFullYear();
+    const firstDay = new Date(y, m, 1);
+    const lastDay = new Date(y, m + 1, 0);
+
+    const startWeekday = firstDay.getDay() as WeekNum;
+    const endWeekday = lastDay.getDay() as WeekNum;
+    const endDate = lastDay.getDate() as MonthNum;
+    const year = y as YearNum;
+    // getMonth returns (0-11) and we want (1-12)
+    const month = m + 1 as MonthNum;
+
+    return new MonthInfo(year, month, endDate, endWeekday, startWeekday);
+  }
+
+  /**
+   * Get the current local date
+   */
+  public static thisMonth(): MonthInfo {
+    const date = new Date();
+    return MonthInfo.fromDate(date);
+  }
+
+  /**
+   * Next month relative to a month
+   */
+  public static toNextMonth(month: IMonthInfo): MonthInfo {
+    // Javascript maps monts 0-11 and we map them 1-12
+    const nextMonth = new Date(month.year, month.month - 1, 1);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    return MonthInfo.fromDate(nextMonth);
+  }
+
+  /**
+   * Previous month relative to a month
+   */
+  public static toPreviousMonth(date: IMonthInfo): MonthInfo {
+    // Javascript maps monts 0-11 and we map them 1-12
+    const nextMonth = new Date(date.year, date.month - 1, 1);
+    nextMonth.setMonth(nextMonth.getMonth() - 1);
+    return MonthInfo.fromDate(nextMonth);
   }
 }

@@ -1,10 +1,12 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 
 import dateReducer from '@/data/redux/reducers/currentDate'
+import monthReducer from '@/data/redux/reducers/currentMonth'
 
 export const store = configureStore({
   reducer: {
-    currentDate: dateReducer
+    currentDate: dateReducer,
+    currentMonth: monthReducer
   }
 });
 
