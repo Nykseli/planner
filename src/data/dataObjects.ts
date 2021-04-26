@@ -219,3 +219,11 @@ export class MonthInfo implements IMonthInfo, Serializable<IMonthInfo> {
     return MonthInfo.fromDate(nextMonth);
   }
 }
+
+/**
+ * Contains data that's needed to display the daily task information in
+ * MonthlyViewScreen days
+ */
+export interface IMonthViewTask {
+  taskCount: number
+}

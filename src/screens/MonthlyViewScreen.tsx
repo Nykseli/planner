@@ -8,7 +8,8 @@ import Layout from '@/constants/Layout'
 import { DateInfo, MonthInfo } from '@/data/dataObjects';
 import Colors from '@/constants/Colors';
 import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
-import { selectMonth, nextMonth, previousMonth } from '@/data/redux/reducers/currentMonth';
+import { selectMonth, nextMonthWithTasks, previousMonthWithTasks } from '@/data/redux/reducers/currentMonth';
+import { fetchTasksAsync, selectMonthlyTask, TaskMap } from '@/data/redux/reducers/montlyTasks';
 import { timeDateFmt } from '@/util/datetime';
 
 const squareWidth = Layout.window.width / 7;
@@ -27,8 +28,8 @@ const PaddingSquare = ({ front, last }: { front: boolean, last?: boolean }) => {
   );
 }
 
-const DaySquare = ({ date, isSunday, isToday, isInFirstWeek }:
-  { date: number, isSunday: boolean, isToday: boolean, isInFirstWeek: boolean }) => {
+const DaySquare = ({ date, isSunday, isToday, isInFirstWeek, taskCount }:
+  { date: number, isSunday: boolean, isToday: boolean, isInFirstWeek: boolean, taskCount: number }) => {
   let _style = styles.dateSquare;
 
   if (isSunday)
@@ -44,11 +45,18 @@ const DaySquare = ({ date, isSunday, isToday, isInFirstWeek }:
   return (
     <View style={_style}>
       <Text style={styles.title}>{date}</Text>
+      {taskCount > 0 &&
+        <View style={styles.dayTaskCount}>
+          <View style={styles.dayTaskCenter}>
+            <Text style={styles.dayTaskCountText}>{taskCount}</Text>
+          </View>
+        </View>
+      }
     </View>
   );
 }
 
-const DateSquares = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
+const DateSquares = ({ cdi, cmi, tasks }: { cdi: DateInfo, cmi: MonthInfo, tasks: TaskMap }) => {
 
   // TODO: should paddings show info from previous and next month?
   const frontPaddingList = Array.from(
@@ -64,11 +72,14 @@ const DateSquares = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
     <View style={styles.squaresContainer}>
       {frontPaddingList}
       {cmi.dateList().map((date) => {
+        const taskCount = tasks[date]?.taskCount || 0;
+
         return <DaySquare
           key={date}
           date={date}
           isToday={cmi.isToday(date, cdi)}
           isSunday={cmi.isSunday(date)}
+          taskCount={taskCount}
           isInFirstWeek={cmi.isInFirstWeek(date)} />
       })}
       {endPaddingList}
@@ -91,8 +102,8 @@ const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
   // TODO: i18n
   const days = ['Maanantai', 'Tiistai', 'Keskiviikko', 'Torstai', 'Perjantai', 'Lauantai', 'Sunnuntai'];
   const months = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-  let dateNums; //= `${cdi.date}.${cdi.month}.${cdi.year}`;
-  let dateStr; //= `${days[cdi.weekday - 1]}, ${months[cdi.month - 1]}kuu`;
+  let dateNums;
+  let dateStr;
 
   if (cdi.month === cmi.month && cdi.year === cmi.year) {
     dateNums = `${timeDateFmt(cdi.date)}.${timeDateFmt(cdi.month)}.${cdi.year}`;
@@ -112,9 +123,22 @@ const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
 
 const MonthlyViewScreen = () => {
   const selectedMonth = useAppSelector(selectMonth);
+  const montlyTasks = useAppSelector(selectMonthlyTask);
   const cmi = MonthInfo.deSerialize(selectedMonth);
   const cdi = DateInfo.today();
   const dispatch = useAppDispatch();
+
+  let taskMap: TaskMap = {};
+
+  // Load initial task data here.
+  // Task loading after this is handled by currentMonth reducer
+  if (montlyTasks.status === 'unitinitalized') {
+    dispatch(fetchTasksAsync(selectedMonth));
+  } else if (montlyTasks.status === 'idle') {
+    // When status is idle, nothing is happening, meaning that
+    // we can use the data
+    taskMap = montlyTasks.tasks;
+  }
 
   return (
     <View style={styles.monthContainer}>
@@ -122,16 +146,16 @@ const MonthlyViewScreen = () => {
         <DateInfoView cdi={cdi} cmi={cmi} />
       </View>
       <View style={styles.dateNavigation}>
-        <Pressable onPress={() => dispatch(previousMonth())}>
+        <Pressable onPress={() => dispatch(previousMonthWithTasks())}>
           <MaterialIcons name="navigate-before" size={35} color="black" />
         </Pressable>
-        <Pressable onPress={() => dispatch(nextMonth())}>
+        <Pressable onPress={() => dispatch(nextMonthWithTasks())}>
           <MaterialIcons name="navigate-next" size={35} color="black" />
         </Pressable>
       </View>
       <View style={styles.dateSquareContainer}>
         <DayNames />
-        <DateSquares cdi={cdi} cmi={cmi} />
+        <DateSquares cdi={cdi} cmi={cmi} tasks={taskMap} />
       </View>
       <AddItemButton />
     </View>
@@ -139,6 +163,26 @@ const MonthlyViewScreen = () => {
 }
 
 const styles = StyleSheet.create({
+  dayTaskCount: {
+    backgroundColor: Colors.seeThrough,
+    height: '50%',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  dayTaskCenter: {
+    flex: 1,
+    flexDirection: 'row',
+    borderRadius: 20,
+    backgroundColor: '#87ceeb',
+    width: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayTaskCountText: {
+    flex: 1,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
   dayText: {
     width: squareWidth,
     textAlign: 'center',

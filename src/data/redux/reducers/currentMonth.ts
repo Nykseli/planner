@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { RootState } from '@/data/redux/store';
+import { AppThunk, RootState } from '@/data/redux/store';
 
 import { IMonthInfo, MonthInfo } from '@/data/dataObjects';
+import { fetchTasksAsync } from './montlyTasks';
 
 export interface CurrentMonthState {
-  month: IMonthInfo,
-  status: 'idle' | 'loading' | 'failed',
+  month: IMonthInfo;
+  status: 'idle' | 'loading' | 'failed';
 }
 
 // Start with the current month by default
@@ -31,6 +32,24 @@ export const monthSlice = createSlice({
 });
 
 export const { nextMonth, previousMonth, currentMonth } = monthSlice.actions;
+
+// TODO: dispatch and getstate types
+export const nextMonthWithTasks = (): AppThunk => (dispatch, getState) => {
+  // First get the next month
+  dispatch(nextMonth());
+  // After we've generated the next month, get the tasks for it asynchronously
+  const nextmonth = selectMonth(getState());
+  dispatch(fetchTasksAsync(nextmonth));
+}
+
+// TODO: dispatch and getstate types
+export const previousMonthWithTasks = (): AppThunk => (dispatch, getState) => {
+  // First get the next month
+  dispatch(previousMonth());
+  // After we've generated the previous month, get the tasks for it asynchronously
+  const previousmonth = selectMonth(getState());
+  dispatch(fetchTasksAsync(previousmonth));
+}
 
 export const selectMonth = (state: RootState) => state.currentMonth.month;
 
