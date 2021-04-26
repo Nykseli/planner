@@ -14,7 +14,6 @@ export interface MonthlyTasksState {
   status: 'unitinitalized' | 'idle' | 'loading' | 'failed';
 }
 
-// Start with the current month by default
 const initialState: MonthlyTasksState = {
   tasks: {},
   status: 'unitinitalized',
@@ -40,8 +39,6 @@ export const tasksSlice = createSlice({
       state.status = 'idle';
       state.tasks = action.payload;
     });
-
-
   }
 });
 

@@ -7,10 +7,11 @@ import { TaskItemModal } from '@/components/TaskItemModal'
 import AddItemButton from '@/components/AddItemButton';
 import Layout from '@/constants/Layout';
 import Colors from '@/constants/Colors';
-import { DateInfo } from '@/data/dataObjects';
+import { DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
-import { selectDate, nextDate, previousDate } from '@/data/redux/reducers/currentDate';
+import { selectDate, nextDateWithTasks, previousDateWithTasks } from '@/data/redux/reducers/currentDate';
+import { fetchDailyTasksAsync, selectDailyTask } from '@/data/redux/reducers/dailyTasks';
 
 const singleBoxHeight = 80;
 const dailyHours = Array.from({ length: 24 }, (_v, k) => k);
@@ -31,19 +32,19 @@ const ScrollHours = () => {
 
 }
 
-const ScrollBoxItem = ({ hour, minute }: { hour: number, minute: number }) => {
+const ScrollBoxItem = ({ title, hour, minute }: { title: string, hour: number, minute: number }) => {
   const position = hour * singleBoxHeight + (singleBoxHeight * (minute / 60));
 
   return (
     <View style={{ marginTop: position, ...styles.scrollBoxItem }}>
       <TaskItemModal>
-        <Text>{`Here is the title of ${timeDateFmt(hour)}:${timeDateFmt(minute)} appointment`}</Text>
+        <Text>{title}</Text>
       </TaskItemModal>
     </View>
   );
 }
 
-const ScrollBoxes = () => {
+const ScrollBoxes = ({ tasks }: { tasks: IDailyTask[] }) => {
   return (
     <View style={styles.scrollBoxesContainer}>
       {dailyHours.map(
@@ -51,42 +52,54 @@ const ScrollBoxes = () => {
           <View style={styles.hourBoxBlock} key={hour}>
           </View>
       )}
-      <ScrollBoxItem hour={15} minute={30} />
-      <ScrollBoxItem hour={0} minute={15} />
-      <ScrollBoxItem hour={2} minute={30} />
-      <ScrollBoxItem hour={1} minute={0} />
+      {tasks.map((task, i) =>
+        <ScrollBoxItem key={i} title={task.title} hour={task.startHour} minute={task.startMinute} />)
+      }
     </View>
   );
 }
 
-const ScrollItems = () => {
+const ScrollItems = ({ tasks }: { tasks: IDailyTask[] }) => {
 
   return (
     <View style={styles.scrollItemContainer}>
       <ScrollHours />
-      <ScrollBoxes />
+      <ScrollBoxes tasks={tasks} />
     </View>
   );
 }
 
 const DailyViewScreen = () => {
   const currentDate = useAppSelector(selectDate);
+  const dailyTasks = useAppSelector(selectDailyTask);
   const dispatch = useAppDispatch();
+
+  let taskList: IDailyTask[] = [];
+
+  // Load initial task data here.
+  // Task loading after this is handled by currentDate reducer
+  if (dailyTasks.status === 'unitinitalized') {
+    dispatch(fetchDailyTasksAsync(currentDate));
+  } else if (dailyTasks.status === 'idle') {
+    // When status is idle, nothing is happening, meaning that
+    // we can use the data
+    taskList = dailyTasks.tasks;
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.dateNavigation}>
-        <Pressable onPress={() => dispatch(previousDate())}>
+        <Pressable onPress={() => dispatch(previousDateWithTasks())}>
           <MaterialIcons name="navigate-before" size={35} color="black" />
         </Pressable>
         <Text style={styles.title}>{DateInfo.toString(currentDate)}</Text>
-        <Pressable onPress={() => dispatch(nextDate())}>
+        <Pressable onPress={() => dispatch(nextDateWithTasks())}>
           <MaterialIcons name="navigate-next" size={35} color="black" />
         </Pressable>
       </View>
       <SafeAreaView style={styles.scrollContainer}>
         <ScrollView style={styles.scrollView}>
-          <ScrollItems />
+          <ScrollItems tasks={taskList} />
         </ScrollView>
       </SafeAreaView>
       <AddItemButton />

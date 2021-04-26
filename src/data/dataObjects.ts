@@ -227,3 +227,17 @@ export class MonthInfo implements IMonthInfo, Serializable<IMonthInfo> {
 export interface IMonthViewTask {
   taskCount: number
 }
+
+/**
+ * Contains data that's needed to display the daily task information
+ * in DailyViewScreen
+ */
+export interface IDailyTask {
+  title: string,
+  desciption: string,
+  date: IDateInfo,
+  startHour: number,
+  startMinute: number,
+  endHour: number,
+  endMinute: number
+}
