@@ -53,7 +53,7 @@ export class DateInfo implements IDateInfo, Serializable<IDateInfo> {
     return `${d}.${m}.${date.year}`
   }
 
-  private static fromDate(date: Date): DateInfo {
+  public static fromDate(date: Date): DateInfo {
     const d = date.getDate() as DateNum;
     const weekday = jsWeekDayToWeekNum(date.getDay());
     // getMonth returns (0-11) and we want (1-12)
@@ -61,6 +61,12 @@ export class DateInfo implements IDateInfo, Serializable<IDateInfo> {
     const year = date.getFullYear() as YearNum;
 
     return new DateInfo(d, weekday, month, year);
+  }
+
+  public static equal(date1: IDateInfo, date2: IDateInfo) {
+    return date1.date == date2.date
+      && date1.month == date2.month
+      && date1.year == date2.year;
   }
 
   /**
@@ -234,10 +240,53 @@ export interface IMonthViewTask {
  */
 export interface IDailyTask {
   title: string,
-  desciption: string,
+  description: string,
   date: IDateInfo,
   startHour: number,
   startMinute: number,
   endHour: number,
   endMinute: number
+}
+
+export class DailyTask implements IDailyTask, Serializable<IDailyTask> {
+  public title: string;
+  public description: string;
+  public date: IDateInfo;
+  public startHour: number;
+  public startMinute: number;
+  public endHour: number;
+  public endMinute: number;
+
+  constructor(title: string,
+    description: string,
+    date: IDateInfo,
+    startHour: number,
+    startMinute: number,
+    endHour: number,
+    endMinute: number
+  ) {
+    this.title = title;
+    this.description = description;
+    this.date = date;
+    this.startHour = startHour;
+    this.startMinute = startMinute;
+    this.endHour = endHour;
+    this.endMinute = endMinute;
+  }
+
+  public serialize(): IDailyTask {
+    return { ...this } as IDailyTask;
+  }
+
+  /**
+   * Create a new DailyTask object with current empty strings and current time.
+   * Initial start hour is next hour and end hour is one hour that.
+   * startMinute and endMinute is always 0
+   */
+  public static new(): DailyTask {
+    const today = DateInfo.today().serialize();
+    const date = new Date();
+
+    return new DailyTask("", "", today, date.getHours() + 1, 0, date.getHours() + 2, 0);
+  }
 }

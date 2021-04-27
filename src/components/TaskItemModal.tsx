@@ -6,16 +6,24 @@ import DateTimePicker, { AndroidNativeProps, Event } from '@react-native-communi
 import Colors from '@/constants/Colors';
 import { Text, View } from './Themed';
 import Layout from '@/constants/Layout';
+import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
+import { timeDateFmt } from '@/util/datetime';
+import { useAppDispatch } from '@/hooks/reduxHooks';
+import { addNewDailyTask } from '@/data/redux/reducers/dailyTasks';
 
 type VisibiltyCb = (bool?: boolean) => void;
+type TaskEditCb = (task: IDailyTask) => void;
 
 interface ITaskItemModal {
   children: React.ReactChild | React.ReactChild[] | React.ReactChildren
 }
 
 interface IEditTaskItemModal {
-  visible: boolean,
-  visibilityCb: VisibiltyCb,
+  visible: boolean;
+  visibilityCb: VisibiltyCb;
+  // If editable is set, TaskItemModal edits existing daily task.
+  // If not set, new one is created on save.
+  editable?: IDailyTask;
 }
 
 interface IFullScreenModalView {
@@ -42,7 +50,22 @@ const FullScreenModalView = (props: IFullScreenModalView) => {
   );
 }
 
-const EditControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) => {
+/**
+ * If the task is new, it will be added to databse.
+ * If not, it will be updated.
+ */
+const EditControlButtons = ({ task, isNew, visibilityCb }:
+  { task: IDailyTask, isNew: boolean, visibilityCb: VisibiltyCb }) => {
+
+  const dispatch = useAppDispatch();
+
+  const updateDailyTask = () => {
+    if (isNew)
+      dispatch(addNewDailyTask(task));
+
+    // TODO: update if not new
+  }
+
   return (
     <View style={styles.controlButtons}>
       <View style={styles.controlLeftButtons}>
@@ -55,39 +78,62 @@ const EditControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) => 
       <View style={styles.controlRightButtons}>
         <Pressable
           style={styles.controlButton}
-          /* TODO: actually update the task onPress={() => save()} */>
+          onPress={() => updateDailyTask()}>
           <MaterialIcons name="done" size={34} />
         </Pressable>
       </View>
-    </View>
+    </View >
   );
 }
 
-const EditFields = () => {
-  const [title, onChangeTitle] = React.useState<string>("Title lorem");
-  const [description, onChangeDescription] = React.useState<string>("Description...");
+const EditFields = ({ editable, editCb }:
+  { editable: IDailyTask, editCb: TaskEditCb }) => {
   const [date, setDate] = React.useState<Date>(new Date());
-  // Both AndroidNativeProps and IOSNativeProps modes contain "date" and "time"
-  const [pickerMode, setPickerMode] = React.useState<AndroidNativeProps['mode']>('date');
-  const [showPicker, setShowPicker] = React.useState<boolean>(false);
+  const [showDatePicker, setShowDatePicker] = React.useState<boolean>(false);
+  const [showEndTimePicker, setShowEndTimePicker] = React.useState<boolean>(false);
+  const [showStartTimePicker, setShowStartTimePicker] = React.useState<boolean>(false);
+
+  const onChangeTitle = (text: string) => {
+    editCb({ ...editable, title: text });
+  }
+
+  const onChangeDescription = (text: string) => {
+    editCb({ ...editable, description: text });
+  }
 
   const onDateChange = (event: Event, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
-    setShowPicker(Platform.OS === 'ios');
+    setShowDatePicker(Platform.OS === 'ios');
     setDate(currentDate);
+    const newDate = DateInfo.fromDate(currentDate).serialize();
+    editCb({ ...editable, date: newDate });
   }
 
-  const showMode = (currentMode: AndroidNativeProps['mode']) => {
-    setShowPicker(true);
-    setPickerMode(currentMode);
+  const onStartTimeChange = (event: Event, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    setShowStartTimePicker(Platform.OS === 'ios');
+    setDate(currentDate);
+    // TODO: make sure this is before end time and alert user on the error
+    editCb({ ...editable, startHour: currentDate.getHours(), startMinute: currentDate.getMinutes() });
+  }
+
+  const onEndTimeChange = (event: Event, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    setShowEndTimePicker(Platform.OS === 'ios');
+    setDate(currentDate);
+    // TODO: make sure this is after start time and alert user on the error
+    editCb({ ...editable, endHour: currentDate.getHours(), endMinute: currentDate.getMinutes() });
   }
 
   const showDatepicker = () => {
-    showMode('date');
+    setShowDatePicker(true);
   }
 
-  const showTimepicker = () => {
-    showMode('time');
+  const showTimepicker = (endTime: boolean) => {
+    if (endTime)
+      setShowEndTimePicker(true);
+    else
+      setShowStartTimePicker(true);
   }
 
   return (
@@ -96,7 +142,7 @@ const EditFields = () => {
         <TextInput
           style={styles.editTextInput}
           onChangeText={onChangeTitle}
-          value={title}
+          value={editable.title}
         />
       </View>
       <View style={styles.editInputView}>
@@ -104,30 +150,62 @@ const EditFields = () => {
         <TextInput
           style={styles.editTextInput}
           onChangeText={onChangeDescription}
-          value={description}
+          value={editable.description}
         />
       </View>
       <Pressable onPress={showDatepicker}>
         <View style={styles.editDateView}>
           <Feather name="edit-3" size={25} />
           {/* TODO: date range? */}
-          <Text style={styles.editDateText}>21.04.2021</Text>
+          <Text style={styles.editDateText}>
+            {DateInfo.toString(editable.date)}
+          </Text>
         </View>
       </Pressable>
-      <Pressable onPress={showTimepicker}>
+      <Pressable onPress={() => showTimepicker(false)}>
         <View style={styles.editDateView}>
           <Feather name="edit-3" size={25} />
-          <Text style={styles.editDateText}>17.00 - 18.00</Text>
+          <Text style={styles.editDateText}>
+            Start time: {timeDateFmt(editable.startHour)}.{timeDateFmt(editable.startMinute)}
+          </Text>
         </View>
       </Pressable>
-      {showPicker && (
+      <Pressable onPress={() => showTimepicker(true)}>
+        <View style={styles.editDateView}>
+          <Feather name="edit-3" size={25} />
+          <Text style={styles.editDateText}>
+            End time: {timeDateFmt(editable.endHour)}.{timeDateFmt(editable.endMinute)}
+          </Text>
+        </View>
+      </Pressable>
+      {showDatePicker && (
         <DateTimePicker
-          testID="dateTimePicker"
+          testID="datePicker"
           value={date}
-          mode={pickerMode}
+          mode="date"
           is24Hour={true}
           display="default"
           onChange={onDateChange}
+        />
+      )}
+      {showStartTimePicker && (
+        <DateTimePicker
+          testID="startTimePicker"
+          value={date}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={onStartTimeChange}
+        />
+      )}
+      {showEndTimePicker && (
+        <DateTimePicker
+          testID="endTimePicker"
+          value={date}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={onEndTimeChange}
         />
       )}
     </View>
@@ -230,10 +308,19 @@ const TaskItemModal = (props: ITaskItemModal) => {
 }
 
 const EditTaskItemModal = (props: IEditTaskItemModal) => {
+  const isNew = props.editable === undefined;
+  const [editTask, setEditTask] = React.useState<IDailyTask>(
+    props.editable || DailyTask.new().serialize()
+  );
+
+  const updateEditTask = (task: IDailyTask) => {
+    setEditTask(task);
+  }
+
   return (
     <FullScreenModalView visible={props.visible} visibilityCb={props.visibilityCb}>
-      <EditControlButtons visibilityCb={props.visibilityCb} />
-      <EditFields />
+      <EditControlButtons task={editTask} isNew={isNew} visibilityCb={props.visibilityCb} />
+      <EditFields editable={editTask} editCb={updateEditTask} />
     </FullScreenModalView>
   );
 }

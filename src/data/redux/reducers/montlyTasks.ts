@@ -1,8 +1,9 @@
 import { createAsyncThunk, createSlice, ActionReducerMapBuilder, PayloadAction, } from '@reduxjs/toolkit';
-import { RootState } from '@/data/redux/store';
+import { AppThunk, RootState } from '@/data/redux/store';
 
-import { IMonthViewTask, IMonthInfo } from '@/data/dataObjects';
+import { IDailyTask, IMonthViewTask, IMonthInfo } from '@/data/dataObjects';
 import { fetchMontlyTasks } from '@/data/api'
+import { selectMonth } from './currentMonth';
 
 export interface TaskMap {
   // Number should be DateNum
@@ -31,7 +32,14 @@ export const fetchTasksAsync = createAsyncThunk(
 export const tasksSlice = createSlice({
   name: 'monthlyTasks',
   initialState,
-  reducers: {},
+  reducers: {
+    addDailyToTasks: (state, action: PayloadAction<IDailyTask>) => {
+      const tDate = action.payload.date.date;
+      const tasks = state.tasks[tDate] ?? { taskCount: 0 };
+      tasks.taskCount += 1;
+      state.tasks[tDate] = tasks;
+    }
+  },
   extraReducers: (builder: ActionReducerMapBuilder<any>) => {
     builder.addCase(fetchTasksAsync.pending, (state: MonthlyTasksState) => {
       state.status = 'loading';
@@ -42,6 +50,17 @@ export const tasksSlice = createSlice({
   }
 });
 
+const { addDailyToTasks } = tasksSlice.actions;
+
 export const selectMonthlyTask = (state: RootState) => state.monthlyTasks;
+
+/**
+ * Add daily task to the monthly tasks if the task exists in the current month.
+ */
+export const addDailyTaskToTasks = (task: IDailyTask): AppThunk => (dispatch, getState) => {
+  const cMonth = selectMonth(getState());
+  if (task.date.month == cMonth.month && task.date.year == cMonth.year)
+    dispatch(addDailyToTasks(task));
+}
 
 export default tasksSlice.reducer;
