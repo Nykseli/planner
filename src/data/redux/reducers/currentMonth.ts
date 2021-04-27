@@ -1,19 +1,37 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, ActionReducerMapBuilder, PayloadAction, } from '@reduxjs/toolkit';
 import { AppThunk, RootState } from '@/data/redux/store';
 
-import { IMonthInfo, MonthInfo } from '@/data/dataObjects';
-import { fetchTasksAsync } from './montlyTasks';
+import { IDailyTask, IMonthViewTask, IMonthInfo, MonthInfo } from '@/data/dataObjects';
+import { fetchMontlyTasks } from '@/data/api'
+
+export interface TaskMap {
+  // Number should be DateNum
+  [tasks: number]: IMonthViewTask;
+}
 
 export interface CurrentMonthState {
   month: IMonthInfo;
-  status: 'idle' | 'loading' | 'failed';
+  tasks: TaskMap;
+  status: 'unitinitalized' | 'idle' | 'loading' | 'failed';
 }
 
 // Start with the current month by default
 const initialState: CurrentMonthState = {
   month: MonthInfo.thisMonth().serialize(),
-  status: 'idle',
+  tasks: {},
+  // Status refers to the loading of the tasks data.
+  // month is always generated locally.
+  status: 'unitinitalized',
 };
+
+export const fetchTasksAsync = createAsyncThunk(
+  'monthlyTasks/fetchTasks',
+  async (month: IMonthInfo) => {
+    const response = await fetchMontlyTasks(month);
+    // The value we return becomes the `fulfilled` action payload
+    return response.data;
+  }
+);
 
 export const monthSlice = createSlice({
   name: 'currentMonth',
@@ -27,11 +45,35 @@ export const monthSlice = createSlice({
     },
     currentMonth: (state) => {
       state.month = MonthInfo.thisMonth().serialize();
+    },
+    addDailyToTasks: (state, action: PayloadAction<IDailyTask>) => {
+      const tDate = action.payload.date.date;
+      const tasks = state.tasks[tDate] ?? { taskCount: 0 };
+      tasks.taskCount += 1;
+      state.tasks[tDate] = tasks;
     }
+  },
+  extraReducers: (builder: ActionReducerMapBuilder<any>) => {
+    builder.addCase(fetchTasksAsync.pending, (state: CurrentMonthState) => {
+      state.status = 'loading';
+    }).addCase(fetchTasksAsync.fulfilled, (state: CurrentMonthState, action: PayloadAction<TaskMap>) => {
+      state.status = 'idle';
+      state.tasks = action.payload;
+    });
   }
 });
 
-export const { nextMonth, previousMonth, currentMonth } = monthSlice.actions;
+export const {
+  nextMonth,
+  currentMonth,
+  previousMonth,
+  addDailyToTasks
+} = monthSlice.actions;
+
+// Only select the actual month from the state
+export const selectMonth = (state: RootState) => state.currentMonth.month;
+// Select the whole currentMonth state
+export const selectMonthlyTask = (state: RootState) => state.currentMonth;
 
 // TODO: dispatch and getstate types
 export const nextMonthWithTasks = (): AppThunk => (dispatch, getState) => {
@@ -51,6 +93,14 @@ export const previousMonthWithTasks = (): AppThunk => (dispatch, getState) => {
   dispatch(fetchTasksAsync(previousmonth));
 }
 
-export const selectMonth = (state: RootState) => state.currentMonth.month;
+/**
+ * Add daily task to the monthly tasks if the task exists in the current month.
+ */
+export const addDailyTaskToTasks = (task: IDailyTask): AppThunk => (dispatch, getState) => {
+  const cMonth = selectMonth(getState());
+  if (task.date.month == cMonth.month && task.date.year == cMonth.year)
+    dispatch(addDailyToTasks(task));
+}
+
 
 export default monthSlice.reducer;

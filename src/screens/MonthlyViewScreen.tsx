@@ -8,9 +8,15 @@ import Layout from '@/constants/Layout'
 import { DateInfo, MonthInfo } from '@/data/dataObjects';
 import Colors from '@/constants/Colors';
 import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
-import { selectMonth, nextMonthWithTasks, previousMonthWithTasks } from '@/data/redux/reducers/currentMonth';
-import { fetchTasksAsync, selectMonthlyTask, TaskMap } from '@/data/redux/reducers/montlyTasks';
 import { timeDateFmt } from '@/util/datetime';
+import {
+  selectMonth,
+  nextMonthWithTasks,
+  previousMonthWithTasks,
+  fetchTasksAsync,
+  selectMonthlyTask,
+  TaskMap
+} from '@/data/redux/reducers/currentMonth';
 
 const squareWidth = Layout.window.width / 7;
 const borderWidth = 3;

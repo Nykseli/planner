@@ -3,7 +3,7 @@ import { AppThunk, RootState } from '@/data/redux/store';
 
 import { DateInfo, IDailyTask, IDateInfo } from '@/data/dataObjects';
 import { fetchDailyTasks, postNewDailyTask, updateExistingDailyTask } from '@/data/api';
-import { addDailyTaskToTasks } from './montlyTasks'
+import { addDailyTaskToTasks } from './currentMonth'
 
 export interface CurrentDateState {
   date: IDateInfo;
