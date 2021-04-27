@@ -81,7 +81,7 @@ export class DateInfo implements IDateInfo, Serializable<IDateInfo> {
    * Next date relative to a date
    */
   public static toNextDay(date: IDateInfo): DateInfo {
-    // Javascript maps monts 0-11 and we map them 1-12
+    // Javascript maps months 0-11 and we map them 1-12
     const nextDay = new Date(date.year, date.month - 1, date.date);
     nextDay.setDate(nextDay.getDate() + 1);
     return DateInfo.fromDate(nextDay);
@@ -91,9 +91,21 @@ export class DateInfo implements IDateInfo, Serializable<IDateInfo> {
    * Previous date relative to a date
    */
   public static toPreviousDay(date: IDateInfo): DateInfo {
-    // Javascript maps monts 0-11 and we map them 1-12
+    // Javascript maps months 0-11 and we map them 1-12
     const nextDay = new Date(date.year, date.month - 1, date.date);
     nextDay.setDate(nextDay.getDate() - 1);
+    return DateInfo.fromDate(nextDay);
+  }
+
+  /**
+   * Create a DateInfo from the month defined by dayInMonth.
+   *
+   * Setting dayInMonth higher than the days in the current month
+   * should be considered as undefined behavior.
+   */
+  public static fromMonth(month: IMonthInfo, dayInMonth: DateNum) {
+    // Javascript maps months 0-11 and we map them 1-12
+    const nextDay = new Date(month.year, month.month - 1, dayInMonth);
     return DateInfo.fromDate(nextDay);
   }
 }
@@ -145,8 +157,8 @@ export class MonthInfo implements IMonthInfo, Serializable<IMonthInfo> {
   /**
   * List of numbers between 1 and endDate. Inclusive
   */
-  public dateList(): Array<number> {
-    return Array.from({ length: this.endDate }, (_v, k) => k + 1);
+  public dateList(): Array<DateNum> {
+    return Array.from({ length: this.endDate }, (_v, k) => (k + 1) as DateNum);
   }
 
   public isSunday(date: number): boolean {

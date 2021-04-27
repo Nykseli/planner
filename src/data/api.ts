@@ -1,5 +1,5 @@
 import { IDailyTask, IDateInfo, IMonthInfo, DateInfo, DailyTask } from './dataObjects'
-import { TaskMap } from './redux/reducers/montlyTasks'
+import { TaskMap } from './redux/reducers/currentMonth'
 
 const tmptoday = DateInfo.today();
 

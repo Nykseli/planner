@@ -1,10 +1,8 @@
-/**
- * Learn more about using TypeScript with React Navigation:
- * https://reactnavigation.org/docs/typescript/
- */
+import { StackScreenProps } from '@react-navigation/stack';
 
 export type RootStackParamList = {
   Root: undefined;
+  DailyView: undefined;
   NotFound: undefined;
 };
 
@@ -20,3 +18,7 @@ export type MonthlyViewParamList = {
 export type DailyViewParamList = {
   DailyViewScreen: undefined;
 };
+
+// Special navigation type from https://reactnavigation.org/docs/typescript/
+export type MonthlyViewNavigation = StackScreenProps<RootStackParamList, 'DailyView'>;
+export type MVNavigation = MonthlyViewNavigation['navigation']

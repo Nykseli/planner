@@ -10,7 +10,12 @@ import Colors from '@/constants/Colors';
 import { DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
-import { selectDate, nextDateWithTasks, previousDateWithTasks, fetchDailyTasksAsync, selectCurrentDate } from '@/data/redux/reducers/currentDate';
+import {
+  nextDateWithTasks,
+  previousDateWithTasks,
+  fetchDailyTasksAsync,
+  selectCurrentDate
+} from '@/data/redux/reducers/currentDate';
 
 const singleBoxHeight = 80;
 const dailyHours = Array.from({ length: 24 }, (_v, k) => k);

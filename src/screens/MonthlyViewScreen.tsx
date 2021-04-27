@@ -8,7 +8,7 @@ import Layout from '@/constants/Layout'
 import { DateInfo, MonthInfo } from '@/data/dataObjects';
 import Colors from '@/constants/Colors';
 import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
-import { timeDateFmt } from '@/util/datetime';
+import { DateNum, timeDateFmt } from '@/util/datetime';
 import {
   selectMonth,
   nextMonthWithTasks,
@@ -17,6 +17,10 @@ import {
   selectMonthlyTask,
   TaskMap
 } from '@/data/redux/reducers/currentMonth';
+import { fromDateInfo } from '@/data/redux/reducers/currentDate';
+import { MVNavigation } from '@/types';
+
+type NavigationLoad = (date: DateNum) => void;
 
 const squareWidth = Layout.window.width / 7;
 const borderWidth = 3;
@@ -34,35 +38,39 @@ const PaddingSquare = ({ front, last }: { front: boolean, last?: boolean }) => {
   );
 }
 
-const DaySquare = ({ date, isSunday, isToday, isInFirstWeek, taskCount }:
-  { date: number, isSunday: boolean, isToday: boolean, isInFirstWeek: boolean, taskCount: number }) => {
+const DaySquare = ({ navLoad, cdi, cmi, date, taskCount }:
+  { navLoad: NavigationLoad, cdi: DateInfo, cmi: MonthInfo, date: DateNum, taskCount: number }) => {
   let _style = styles.dateSquare;
 
-  if (isSunday)
+  if (cmi.isSunday(date))
     _style = { ..._style, borderRightWidth: borderWidth }
 
-  if (isInFirstWeek)
+  if (cmi.isInFirstWeek(date))
     _style = { ..._style, borderTopWidth: borderWidth }
 
-  if (isToday)
+  if (cmi.isToday(date, cdi))
     _style = { ..._style, backgroundColor: "#d3d3d3ff" }
 
-
   return (
-    <View style={_style}>
-      <Text style={styles.title}>{date}</Text>
-      {taskCount > 0 &&
-        <View style={styles.dayTaskCount}>
-          <View style={styles.dayTaskCenter}>
-            <Text style={styles.dayTaskCountText}>{taskCount}</Text>
+    <Pressable onPress={() => navLoad(date)}>
+      <View style={_style}>
+        <Text style={styles.title}>{date}</Text>
+        {taskCount > 0 &&
+          <View style={styles.dayTaskCount}>
+            <View style={styles.dayTaskCenter}>
+              <Text style={styles.dayTaskCountText}>{taskCount}</Text>
+            </View>
           </View>
-        </View>
-      }
-    </View>
+        }
+      </View>
+    </Pressable>
   );
 }
 
-const DateSquares = ({ cdi, cmi, tasks }: { cdi: DateInfo, cmi: MonthInfo, tasks: TaskMap }) => {
+const DateSquares = ({ nav, cdi, cmi, tasks }:
+  { nav: MVNavigation, cdi: DateInfo, cmi: MonthInfo, tasks: TaskMap }) => {
+
+  const dispatch = useAppDispatch();
 
   // TODO: should paddings show info from previous and next month?
   const frontPaddingList = Array.from(
@@ -74,6 +82,15 @@ const DateSquares = ({ cdi, cmi, tasks }: { cdi: DateInfo, cmi: MonthInfo, tasks
     <PaddingSquare front={false} last={k === 7 - cmi.endWeekday - 1} key={k} />
   );
 
+  /**
+   * Load certain date info and navigate to it.
+   */
+  const navigateDay = (date: DateNum) => {
+    const targetDate = DateInfo.fromMonth(cmi, date).serialize();
+    dispatch(fromDateInfo(targetDate));
+    nav.navigate('DailyView');
+  }
+
   return (
     <View style={styles.squaresContainer}>
       {frontPaddingList}
@@ -83,10 +100,10 @@ const DateSquares = ({ cdi, cmi, tasks }: { cdi: DateInfo, cmi: MonthInfo, tasks
         return <DaySquare
           key={date}
           date={date}
-          isToday={cmi.isToday(date, cdi)}
-          isSunday={cmi.isSunday(date)}
-          taskCount={taskCount}
-          isInFirstWeek={cmi.isInFirstWeek(date)} />
+          cmi={cmi}
+          cdi={cdi}
+          navLoad={navigateDay}
+          taskCount={taskCount} />
       })}
       {endPaddingList}
     </View>
@@ -127,7 +144,7 @@ const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
   );
 }
 
-const MonthlyViewScreen = () => {
+const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
   const selectedMonth = useAppSelector(selectMonth);
   const montlyTasks = useAppSelector(selectMonthlyTask);
   const cmi = MonthInfo.deSerialize(selectedMonth);
@@ -161,7 +178,7 @@ const MonthlyViewScreen = () => {
       </View>
       <View style={styles.dateSquareContainer}>
         <DayNames />
-        <DateSquares cdi={cdi} cmi={cmi} tasks={taskMap} />
+        <DateSquares nav={navigation} cdi={cdi} cmi={cmi} tasks={taskMap} />
       </View>
       <AddItemButton />
     </View>
