@@ -27,11 +27,14 @@ export const dateSlice = createSlice({
     },
     currentDate: (state) => {
       state.date = DateInfo.today().serialize();
+    },
+    fromDateInfo: (state, action: PayloadAction<IDateInfo>) => {
+      state.date = action.payload;
     }
   }
 });
 
-export const { nextDate, previousDate, currentDate } = dateSlice.actions;
+export const { nextDate, fromDateInfo, previousDate, currentDate } = dateSlice.actions;
 
 // TODO: dispatch and getstate types
 export const nextDateWithTasks = (): AppThunk => (dispatch, getState) => {

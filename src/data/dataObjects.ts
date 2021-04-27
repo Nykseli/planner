@@ -239,6 +239,8 @@ export interface IMonthViewTask {
  * in DailyViewScreen
  */
 export interface IDailyTask {
+  // Unique task indentifier
+  id: number;
   title: string,
   description: string,
   date: IDateInfo,
@@ -249,6 +251,7 @@ export interface IDailyTask {
 }
 
 export class DailyTask implements IDailyTask, Serializable<IDailyTask> {
+  public id: number;
   public title: string;
   public description: string;
   public date: IDateInfo;
@@ -256,6 +259,13 @@ export class DailyTask implements IDailyTask, Serializable<IDailyTask> {
   public startMinute: number;
   public endHour: number;
   public endMinute: number;
+
+  // Temporarily generate id's with this.
+  // This can be removed when we get the ids from the backend.
+  private static uniqueId: number = 1;
+  public static genId = (): number => {
+    return DailyTask.uniqueId++;
+  }
 
   constructor(title: string,
     description: string,
@@ -265,6 +275,7 @@ export class DailyTask implements IDailyTask, Serializable<IDailyTask> {
     endHour: number,
     endMinute: number
   ) {
+    this.id = DailyTask.genId();
     this.title = title;
     this.description = description;
     this.date = date;

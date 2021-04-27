@@ -32,13 +32,13 @@ const ScrollHours = () => {
 
 }
 
-const ScrollBoxItem = ({ title, hour, minute }: { title: string, hour: number, minute: number }) => {
-  const position = hour * singleBoxHeight + (singleBoxHeight * (minute / 60));
+const ScrollBoxItem = ({ task }: { task: IDailyTask }) => {
+  const position = task.startHour * singleBoxHeight + (singleBoxHeight * (task.startMinute / 60));
 
   return (
     <View style={{ marginTop: position, ...styles.scrollBoxItem }}>
-      <TaskItemModal>
-        <Text>{title}</Text>
+      <TaskItemModal task={task}>
+        <Text>{task.title}</Text>
       </TaskItemModal>
     </View>
   );
@@ -53,7 +53,7 @@ const ScrollBoxes = ({ tasks }: { tasks: IDailyTask[] }) => {
           </View>
       )}
       {tasks.map((task, i) =>
-        <ScrollBoxItem key={i} title={task.title} hour={task.startHour} minute={task.startMinute} />)
+        <ScrollBoxItem key={i} task={task} />)
       }
     </View>
   );

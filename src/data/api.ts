@@ -1,4 +1,4 @@
-import { IDailyTask, IDateInfo, IMonthInfo, DateInfo } from './dataObjects'
+import { IDailyTask, IDateInfo, IMonthInfo, DateInfo, DailyTask } from './dataObjects'
 import { TaskMap } from './redux/reducers/montlyTasks'
 
 const tmptoday = DateInfo.today();
@@ -20,8 +20,9 @@ export function fetchMontlyTasks(month: IMonthInfo) {
 
 interface TMPDailyTasks { [date: number]: IDailyTask[] }
 interface TMPMonthTasks { [month: number]: TMPDailyTasks }
-const tmpDailyTaskList: TMPMonthTasks = { [tmptoday.month]: {} };
-tmpDailyTaskList[tmptoday.month][tmptoday.date] = [{ title: "Test title for this test day", description: "Short lorem ipsum lopsum for now", date: DateInfo.today().serialize(), startHour: 1, startMinute: 10, endHour: 2, endMinute: 30, }, { title: "Second thing is happening", description: "Well this is interesting I hope this is a good thing!", date: DateInfo.today().serialize(), startHour: 4, startMinute: 20, endHour: 5, endMinute: 30, }];
+let tmpDailyTaskList: TMPMonthTasks = { [tmptoday.month]: {} };
+tmpDailyTaskList[tmptoday.month][tmptoday.date] = [{ id: DailyTask.genId(), title: "Test title for this test day", description: "Short lorem ipsum lopsum for now", date: DateInfo.today().serialize(), startHour: 1, startMinute: 10, endHour: 2, endMinute: 30, }, { id: DailyTask.genId(), title: "Second thing is happening", description: "Well this is interesting I hope this is a good thing!", date: DateInfo.today().serialize(), startHour: 4, startMinute: 20, endHour: 5, endMinute: 30, }];
+
 // A mock function to mimic making an async request for task data
 export function fetchDailyTasks(date: IDateInfo) {
   return new Promise<{ data: IDailyTask[] }>(
@@ -34,9 +35,20 @@ export function fetchDailyTasks(date: IDateInfo) {
 
 export function postNewDailyTask(task: IDailyTask) {
   return new Promise<{ data: IDailyTask }>(
-    (resolve) =>
+    (resolve) => {
       setTimeout(() => resolve(
         { data: task },
       ), 250)
+    }
+  );
+}
+
+export function updateExistingDailyTask(task: IDailyTask) {
+  return new Promise<{ data: IDailyTask }>(
+    (resolve) => {
+      setTimeout(() => resolve(
+        { data: task },
+      ), 250)
+    }
   );
 }

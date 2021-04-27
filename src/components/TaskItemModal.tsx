@@ -1,7 +1,7 @@
 import React from 'react';
 import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
 import { Alert, StyleSheet, Modal, Platform, Pressable, TextInput } from 'react-native';
-import DateTimePicker, { AndroidNativeProps, Event } from '@react-native-community/datetimepicker';
+import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
 
 import Colors from '@/constants/Colors';
 import { Text, View } from './Themed';
@@ -9,13 +9,14 @@ import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppDispatch } from '@/hooks/reduxHooks';
-import { addNewDailyTask } from '@/data/redux/reducers/dailyTasks';
+import { addNewDailyTask, editExistingDailyTask } from '@/data/redux/reducers/dailyTasks';
 
 type VisibiltyCb = (bool?: boolean) => void;
 type TaskEditCb = (task: IDailyTask) => void;
 
 interface ITaskItemModal {
-  children: React.ReactChild | React.ReactChild[] | React.ReactChildren
+  children: React.ReactChild | React.ReactChild[] | React.ReactChildren;
+  task: IDailyTask;
 }
 
 interface IEditTaskItemModal {
@@ -62,8 +63,8 @@ const EditControlButtons = ({ task, isNew, visibilityCb }:
   const updateDailyTask = () => {
     if (isNew)
       dispatch(addNewDailyTask(task));
-
-    // TODO: update if not new
+    else
+      dispatch(editExistingDailyTask(task));
   }
 
   return (
@@ -212,7 +213,8 @@ const EditFields = ({ editable, editCb }:
   );
 }
 
-const ModalControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) => {
+const ModalControlButtons = ({ task, visibilityCb }:
+  { task: IDailyTask, visibilityCb: VisibiltyCb }) => {
   const [editVisible, setEditVisible] = React.useState<boolean>(false);
 
   const changeEditVisiblity = (b?: boolean) => {
@@ -225,7 +227,7 @@ const ModalControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) =>
 
   return (
     <View style={styles.controlButtons}>
-      <EditTaskItemModal visible={editVisible} visibilityCb={changeEditVisiblity} />
+      <EditTaskItemModal editable={task} visible={editVisible} visibilityCb={changeEditVisiblity} />
       <View style={styles.controlLeftButtons}>
         <Pressable
           style={styles.controlButton}
@@ -258,28 +260,35 @@ const ModalControlButtons = ({ visibilityCb }: { visibilityCb: VisibiltyCb }) =>
   );
 }
 
-const TaskItemInfo = () => {
+const TaskItemInfo = ({ task }: { task: IDailyTask }) => {
   // TODO: max info text lenght. 255? the current lorem ipsum is 475
   // TODO: picture preview. clicking the thumbnail
   //       will open the picture into new full screen modal
+
+  // Helper function to make formatting more readable
+  const tf = (n: number): string => {
+    return `${timeDateFmt(n)}`;
+  }
+
+  const timeString = (): string => {
+    return `${tf(task.startHour)}.${tf(task.startMinute)} - ${tf(task.endHour)}.${tf(task.endMinute)}`
+  }
+
+  const timeDateString = (): string => {
+    return `${DateInfo.toString(task.date)} ${timeString()}`
+  }
+
   return (
     <View style={styles.itemInfo}>
-      <Text style={styles.itemInfoTitle}>Item title</Text>
-      <Text style={styles.itemInfoDate}>22.04.2021 17.00 - 18.00</Text>
+      <Text style={styles.itemInfoTitle}>{task.title}</Text>
+      <Text style={styles.itemInfoDate}>{timeDateString()}</Text>
       <Text style={styles.itemInfoText}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque congue
-        tortor ligula, sit amet eleifend erat bibendum sed. Donec aliquam gravida
-        diam, vitae luctus orci vulputate ac. Fusce scelerisque, lectus vel
-        maximus luctus, risus augue blandit diam, vel pharetra nisl urna sit
-        amet est. Integer nec libero id dui ullamcorper posuere id ut risus.
-        Suspendisse porta, tortor at auctor fringilla, nulla magna bibendum diam,
-        eu commodo mauris ligula eu nibh. In vel ante mi.
+        {task.description}
       </Text>
     </View>
   );
 }
 
-// TODO: use reducer to show the information?
 const TaskItemModal = (props: ITaskItemModal) => {
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
@@ -294,8 +303,8 @@ const TaskItemModal = (props: ITaskItemModal) => {
   return (
     <View style={styles.centeredView}>
       <FullScreenModalView visibilityCb={changeVisiblity} visible={modalVisible}>
-        <ModalControlButtons visibilityCb={changeVisiblity} />
-        <TaskItemInfo />
+        <ModalControlButtons task={props.task} visibilityCb={changeVisiblity} />
+        <TaskItemInfo task={props.task} />
       </FullScreenModalView>
       <Pressable
         style={[styles.button, styles.buttonOpen]}
