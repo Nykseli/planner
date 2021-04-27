@@ -10,8 +10,7 @@ import Colors from '@/constants/Colors';
 import { DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppSelector, useAppDispatch } from '@/hooks/reduxHooks';
-import { selectDate, nextDateWithTasks, previousDateWithTasks } from '@/data/redux/reducers/currentDate';
-import { fetchDailyTasksAsync, selectDailyTask } from '@/data/redux/reducers/dailyTasks';
+import { selectDate, nextDateWithTasks, previousDateWithTasks, fetchDailyTasksAsync, selectCurrentDate } from '@/data/redux/reducers/currentDate';
 
 const singleBoxHeight = 80;
 const dailyHours = Array.from({ length: 24 }, (_v, k) => k);
@@ -70,20 +69,20 @@ const ScrollItems = ({ tasks }: { tasks: IDailyTask[] }) => {
 }
 
 const DailyViewScreen = () => {
-  const currentDate = useAppSelector(selectDate);
-  const dailyTasks = useAppSelector(selectDailyTask);
+  const currentDateState = useAppSelector(selectCurrentDate);
+  const currentDate = currentDateState.date;
   const dispatch = useAppDispatch();
 
   let taskList: IDailyTask[] = [];
 
   // Load initial task data here.
   // Task loading after this is handled by currentDate reducer
-  if (dailyTasks.status === 'unitinitalized') {
+  if (currentDateState.status === 'unitinitalized') {
     dispatch(fetchDailyTasksAsync(currentDate));
-  } else if (dailyTasks.status === 'idle') {
+  } else if (currentDateState.status === 'idle') {
     // When status is idle, nothing is happening, meaning that
     // we can use the data
-    taskList = dailyTasks.tasks;
+    taskList = currentDateState.tasks;
   }
 
   return (

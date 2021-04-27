@@ -9,7 +9,7 @@ import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppDispatch } from '@/hooks/reduxHooks';
-import { addNewDailyTask, editExistingDailyTask } from '@/data/redux/reducers/dailyTasks';
+import { addNewDailyTask, editExistingDailyTask } from '@/data/redux/reducers/currentDate';
 
 type VisibiltyCb = (bool?: boolean) => void;
 type TaskEditCb = (task: IDailyTask) => void;
