@@ -17,7 +17,7 @@ import {
   selectMonthlyTask,
   MonthTaskList
 } from '@/data/redux/reducers/currentMonth';
-import { fromDateInfo } from '@/data/redux/reducers/currentDate';
+import { fetchDailyTasksAsync, fromDateInfo } from '@/data/redux/reducers/currentDate';
 import { MVNavigation } from '@/types';
 
 type NavigationLoad = (date: DateNum) => void;
@@ -87,6 +87,7 @@ const DateSquares = ({ nav, cdi, cmi, tasks }:
    */
   const navigateDay = (date: DateNum) => {
     const targetDate = DateInfo.fromMonth(cmi, date).serialize();
+    dispatch(fetchDailyTasksAsync(targetDate));
     dispatch(fromDateInfo(targetDate));
     nav.navigate('DailyView');
   }

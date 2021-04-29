@@ -45,10 +45,28 @@ export const monthSlice = createSlice({
       state.month = MonthInfo.thisMonth().serialize();
     },
     addDailyToTasks: (state, action: PayloadAction<IDailyTask>) => {
-      const tDate = action.payload.date.date;
-      const tasks = state.tasks[tDate] ?? { taskCount: 0 };
-      tasks.taskCount += 1;
-      state.tasks[tDate] = tasks;
+      const tDate = action.payload.date;
+      if (tDate.month == state.month.month && tDate.year == state.month.year) {
+        // Dates are 1-31 but task list is 0 indexed
+        const dateIdx = tDate.date - 1;
+        const tasks = state.tasks[dateIdx] ?? { taskCount: 0 };
+        tasks.taskCount += 1;
+        state.tasks[dateIdx] = tasks;
+
+      }
+    },
+    removeDailyFromTasks: (state, action: PayloadAction<IDailyTask>) => {
+      const tDate = action.payload.date;
+      if (tDate.month == state.month.month && tDate.year == state.month.year) {
+        // Dates are 1-31 but task list is 0 indexed
+        const dateIdx = tDate.date - 1;
+        // Make sure that date has 0 tasks if for some reason we
+        // try to update a date that's not defined.
+        const tasks = state.tasks[dateIdx] ?? { taskCount: 1 };
+
+        tasks.taskCount -= 1;
+        state.tasks[dateIdx] = tasks;
+      }
     }
   },
   extraReducers: (builder: ActionReducerMapBuilder<any>) => {
@@ -69,7 +87,8 @@ export const {
   nextMonth,
   currentMonth,
   previousMonth,
-  addDailyToTasks
+  addDailyToTasks,
+  removeDailyFromTasks
 } = monthSlice.actions;
 
 // Only select the actual month from the state

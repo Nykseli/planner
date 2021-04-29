@@ -9,10 +9,12 @@ import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppDispatch } from '@/hooks/reduxHooks';
+import { removeDailyFromTasks } from '@/data/redux/reducers/currentMonth';
 import {
   addNewDailyTask,
+  removeDailyTask,
   editExistingDailyTask,
-  removeExistingDailyTask
+  removeExistingDailyTask,
 } from '@/data/redux/reducers/currentDate';
 
 type VisibiltyCb = (bool?: boolean) => void;
@@ -65,10 +67,15 @@ const EditControlButtons = ({ task, isNew, visibilityCb }:
   const dispatch = useAppDispatch();
 
   const updateDailyTask = () => {
-    if (isNew)
-      dispatch(addNewDailyTask(task));
-    else
-      dispatch(editExistingDailyTask(task));
+    if (isNew) {
+      dispatch(addNewDailyTask(task, {
+        onSuccess: () => visibilityCb(false)
+      }));
+    } else {
+      dispatch(editExistingDailyTask(task, {
+        onSuccess: () => visibilityCb(false)
+      }));
+    }
   }
 
   return (
@@ -224,7 +231,11 @@ const ModalControlButtons = ({ task, visibilityCb }:
   const dispatch = useAppDispatch();
 
   const deleteTask = () => {
-    dispatch(removeExistingDailyTask(task));
+    dispatch(removeExistingDailyTask(task, {
+      onSuccess: () => {
+        visibilityCb(false);
+      }
+    }));
   }
 
   const changeEditVisiblity = (b?: boolean) => {

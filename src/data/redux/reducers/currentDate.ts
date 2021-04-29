@@ -3,7 +3,8 @@ import { AppThunk, RootState } from '@/data/redux/store';
 
 import { DateInfo, IDailyTask, IDateInfo } from '@/data/dataObjects';
 import { fetchDailyTasks, postNewDailyTask, updateExistingDailyTask, deleteExistingDailyTask } from '@/data/api';
-import { addDailyTaskToTasks } from './currentMonth'
+import { addDailyTaskToTasks, removeDailyFromTasks } from './currentMonth'
+import { ReducerCallBacks } from '@/types';
 
 export interface CurrentDateState {
   date: IDateInfo;
@@ -68,6 +69,8 @@ export const dateSlice = createSlice({
   },
   extraReducers: (builder: ActionReducerMapBuilder<CurrentDateState>) => {
     builder.addCase(fetchDailyTasksAsync.pending, (state: CurrentDateState) => {
+      // Reset the tasks so old tasks won't be shown
+      state.tasks = [];
       state.status = 'loading';
     }).addCase(fetchDailyTasksAsync.fulfilled, (state: CurrentDateState, action: PayloadAction<IDailyTask[]>) => {
       state.status = 'idle';
@@ -118,7 +121,7 @@ export const previousDateWithTasks = (): AppThunk => (dispatch, getState) => {
  * Task is updated to dailyTasks and montlyTasks if the api call is succesful.
  */
 // TODO: dispatch and getstate types.
-export const addNewDailyTask = (task: IDailyTask): AppThunk => (dispatch, getState) => {
+export const addNewDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThunk => (dispatch, getState) => {
   // TODO: set errors on fail
   postNewDailyTask(task).then((data) => {
     const nTask = data.addDailyTask;
@@ -128,7 +131,13 @@ export const addNewDailyTask = (task: IDailyTask): AppThunk => (dispatch, getSta
     }
 
     dispatch(addDailyTaskToTasks(nTask));
+
+    // TODO: let user know this was a success
+    if (cb !== undefined && cb.onSuccess !== undefined)
+      cb.onSuccess();
   }).catch((reason) => {
+    if (cb !== undefined && cb.onFail !== undefined)
+      cb.onFail(reason);
     // TODO: display an error
     console.warn(reason);
   });
@@ -139,7 +148,7 @@ export const addNewDailyTask = (task: IDailyTask): AppThunk => (dispatch, getSta
  * Task is updated to dailyTasks and montlyTasks if the api call is succesful.
  */
 // TODO: dispatch and getstate types.
-export const editExistingDailyTask = (task: IDailyTask): AppThunk => (dispatch, getState) => {
+export const editExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThunk => (dispatch, getState) => {
   // TODO: set errors on fail
   updateExistingDailyTask(task).then((data) => {
     const nTask = data.updateDailyTask;
@@ -155,19 +164,30 @@ export const editExistingDailyTask = (task: IDailyTask): AppThunk => (dispatch, 
     }
 
     // TODO: let user know this was a success
+    if (cb !== undefined && cb.onSuccess !== undefined)
+      cb.onSuccess();
+
   }).catch((reason) => {
+    if (cb !== undefined && cb.onFail !== undefined)
+      cb.onFail(reason);
     // TODO: display an error
     console.warn(reason);
   });
 }
 
-export const removeExistingDailyTask = (task: IDailyTask): AppThunk => (dispatch, getState) => {
+export const removeExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThunk => (dispatch, getState) => {
   // TODO: set errors on fail
   deleteExistingDailyTask(task).then((data) => {
     const nTask = data.deleteDailyTask;
     dispatch(removeDailyTask(nTask));
+    dispatch(removeDailyFromTasks(nTask));
     // TODO: let user know this was a success
+    if (cb !== undefined && cb.onSuccess !== undefined)
+      cb.onSuccess();
+
   }).catch((reason) => {
+    if (cb !== undefined && cb.onFail !== undefined)
+      cb.onFail(reason);
     // TODO: display an error
     console.warn(reason);
   });
