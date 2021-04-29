@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, ActionReducerMapBuilder, PayloadAction, 
 import { AppThunk, RootState } from '@/data/redux/store';
 
 import { DateInfo, IDailyTask, IDateInfo } from '@/data/dataObjects';
-import { fetchDailyTasks, postNewDailyTask, updateExistingDailyTask } from '@/data/api';
+import { fetchDailyTasks, postNewDailyTask, updateExistingDailyTask, deleteExistingDailyTask } from '@/data/api';
 import { addDailyTaskToTasks } from './currentMonth'
 
 export interface CurrentDateState {
@@ -25,7 +25,8 @@ export const fetchDailyTasksAsync = createAsyncThunk(
   async (date: IDateInfo) => {
     const response = await fetchDailyTasks(date);
     // The value we return becomes the `fulfilled` action payload
-    return response.data;
+    // If fetch fails it's handeled by fetchDailyTasksAsync.rejected
+    return response.dailyTasks;
   }
 );
 
@@ -71,6 +72,10 @@ export const dateSlice = createSlice({
     }).addCase(fetchDailyTasksAsync.fulfilled, (state: CurrentDateState, action: PayloadAction<IDailyTask[]>) => {
       state.status = 'idle';
       state.tasks = action.payload;
+    }).addCase(fetchDailyTasksAsync.rejected, (state: CurrentDateState) => {
+      state.status = 'failed';
+      // TODO: show networking error to user
+      console.warn("fetchDailyTasksAsync was rejected");
     });
   }
 });
@@ -116,7 +121,7 @@ export const previousDateWithTasks = (): AppThunk => (dispatch, getState) => {
 export const addNewDailyTask = (task: IDailyTask): AppThunk => (dispatch, getState) => {
   // TODO: set errors on fail
   postNewDailyTask(task).then((data) => {
-    const nTask = data.data;
+    const nTask = data.addDailyTask;
     const cDate = selectDate(getState());
     if (DateInfo.equal(cDate, nTask.date)) {
       dispatch(addDailyTask(nTask));
@@ -137,7 +142,7 @@ export const addNewDailyTask = (task: IDailyTask): AppThunk => (dispatch, getSta
 export const editExistingDailyTask = (task: IDailyTask): AppThunk => (dispatch, getState) => {
   // TODO: set errors on fail
   updateExistingDailyTask(task).then((data) => {
-    const nTask = data.data;
+    const nTask = data.updateDailyTask;
     const cDate = selectDate(getState());
     // TODO: also update and remove the task from monthly tasks
     if (DateInfo.equal(cDate, nTask.date)) {
@@ -149,6 +154,18 @@ export const editExistingDailyTask = (task: IDailyTask): AppThunk => (dispatch, 
       dispatch(fromDateInfo(nTask.date));
     }
 
+    // TODO: let user know this was a success
+  }).catch((reason) => {
+    // TODO: display an error
+    console.warn(reason);
+  });
+}
+
+export const removeExistingDailyTask = (task: IDailyTask): AppThunk => (dispatch, getState) => {
+  // TODO: set errors on fail
+  deleteExistingDailyTask(task).then((data) => {
+    const nTask = data.deleteDailyTask;
+    dispatch(removeDailyTask(nTask));
     // TODO: let user know this was a success
   }).catch((reason) => {
     // TODO: display an error

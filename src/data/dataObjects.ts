@@ -10,6 +10,25 @@ abstract class Serializable<I> {
   // public static abstarct deSerialize(obj: I): O;
 }
 
+/**
+ * Turn Serialized into object string without quotes.
+ *
+ * NaN's become null.
+ */
+export function stringifySerialized(serialized: any): string {
+  if (typeof serialized !== "object") {
+    // not an object, stringify using native function
+    return JSON.stringify(serialized);
+  }
+  // Implements recursive object serialization according to JSON spec
+  // but without quotes around the keys.
+  let props: any = Object
+    .keys(serialized)
+    .map(key => `${key}:${stringifySerialized(serialized[key])}`)
+    .join(",");
+  return `{${props}}`;
+}
+
 export interface IDateInfo {
   // The day of the month (1–31)
   date: DateNum;
@@ -230,9 +249,9 @@ export class MonthInfo implements IMonthInfo, Serializable<IMonthInfo> {
   /**
    * Previous month relative to a month
    */
-  public static toPreviousMonth(date: IMonthInfo): MonthInfo {
+  public static toPreviousMonth(month: IMonthInfo): MonthInfo {
     // Javascript maps monts 0-11 and we map them 1-12
-    const nextMonth = new Date(date.year, date.month - 1, 1);
+    const nextMonth = new Date(month.year, month.month - 1, 1);
     nextMonth.setMonth(nextMonth.getMonth() - 1);
     return MonthInfo.fromDate(nextMonth);
   }

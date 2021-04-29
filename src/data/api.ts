@@ -1,54 +1,92 @@
-import { IDailyTask, IDateInfo, IMonthInfo, DateInfo, DailyTask } from './dataObjects'
-import { TaskMap } from './redux/reducers/currentMonth'
+import { Platform } from 'react-native';
+import { request, gql } from 'graphql-request'
 
-const tmptoday = DateInfo.today();
+import { IDailyTask, IDateInfo, IMonthInfo, stringifySerialized } from './dataObjects'
+import { MonthTaskList } from './redux/reducers/currentMonth'
 
-interface TMPTaskMap { [month: number]: TaskMap; }
-const tempMonthlyTaskData: TMPTaskMap = {};
-tempMonthlyTaskData[tmptoday.month] = { 1: { taskCount: 5 }, 4: { taskCount: 3 }, 5: { taskCount: 4 }, 12: { taskCount: 15 }, 16: { taskCount: 20 }, 17: { taskCount: 6 }, 18: { taskCount: 1 }, 20: { taskCount: 12 }, 25: { taskCount: 88 }, };
-tempMonthlyTaskData[tmptoday.month + 1] = { 3: { taskCount: 5 }, 1: { taskCount: 3 }, 5: { taskCount: 4 }, 12: { taskCount: 12 }, 14: { taskCount: 6 }, 15: { taskCount: 3 }, 16: { taskCount: 4 }, 17: { taskCount: 20 }, 18: { taskCount: 15 }, 20: { taskCount: 12 }, 28: { taskCount: 15 }, };
+type TaskMutation = 'addDailyTask' | 'updateDailyTask' | 'deleteDailyTask'
 
-// A mock function to mimic making an async request for task data
-export function fetchMontlyTasks(month: IMonthInfo) {
-  return new Promise<{ data: TaskMap }>(
-    (resolve) =>
-      setTimeout(() => resolve(
-        { data: tempMonthlyTaskData[month.month] || {} },
-      ), 250)
-  );
+// On android 10.0.2.2 refers to host maschine localhost
+const apiUrl = "http://10.0.2.2:4000";
+if (Platform.OS !== 'android') {
+  throw new Error("Fix API url on non-android platform");
 }
 
-interface TMPDailyTasks { [date: number]: IDailyTask[] }
-interface TMPMonthTasks { [month: number]: TMPDailyTasks }
-let tmpDailyTaskList: TMPMonthTasks = { [tmptoday.month]: {} };
-tmpDailyTaskList[tmptoday.month][tmptoday.date] = [{ id: DailyTask.genId(), title: "Test title for this test day", description: "Short lorem ipsum lopsum for now", date: DateInfo.today().serialize(), startHour: 1, startMinute: 10, endHour: 2, endMinute: 30, }, { id: DailyTask.genId(), title: "Second thing is happening", description: "Well this is interesting I hope this is a good thing!", date: DateInfo.today().serialize(), startHour: 4, startMinute: 20, endHour: 5, endMinute: 30, }];
-
-// A mock function to mimic making an async request for task data
-export function fetchDailyTasks(date: IDateInfo) {
-  return new Promise<{ data: IDailyTask[] }>(
-    (resolve) =>
-      setTimeout(() => resolve(
-        { data: tmpDailyTaskList[date.month][date.date] || [] },
-      ), 250)
-  );
-}
-
-export function postNewDailyTask(task: IDailyTask) {
-  return new Promise<{ data: IDailyTask }>(
-    (resolve) => {
-      setTimeout(() => resolve(
-        { data: task },
-      ), 250)
+const genMontlyTasksRequest = (month: IMonthInfo): string => {
+  return gql`
+  {
+    monthlyTasks(month:${month.month}, year: ${month.year}) {
+      taskCount
     }
-  );
+  }`;
 }
 
-export function updateExistingDailyTask(task: IDailyTask) {
-  return new Promise<{ data: IDailyTask }>(
-    (resolve) => {
-      setTimeout(() => resolve(
-        { data: task },
-      ), 250)
+const genDailyTasksRequest = (date: IDateInfo): string => {
+  return gql`
+  {
+    dailyTasks(date:${stringifySerialized(date)}) {
+      id
+      title
+      description,
+      date {
+        date
+        month
+        year
+        weekday
+      }
+      startHour
+      startMinute
+      endHour
+      endMinute
     }
-  );
+  }`;
+}
+
+const genTaskMutationRequest = (mutation: TaskMutation, task: IDailyTask): string => {
+  return gql`
+  mutation {
+    ${mutation}(task:${stringifySerialized(task)}) {
+      id
+      title
+      description,
+      date {
+        date
+        month
+        year
+        weekday
+      }
+      startHour
+      startMinute
+      endHour
+      endMinute
+    }
+  }`;
+}
+
+export const fetchMontlyTasks = (month: IMonthInfo):
+  Promise<{ monthlyTasks: MonthTaskList }> => {
+  return request(apiUrl, genMontlyTasksRequest(month));
+}
+
+export const fetchDailyTasks = (date: IDateInfo):
+  Promise<{ dailyTasks: IDailyTask[] }> => {
+  return request(apiUrl, genDailyTasksRequest(date));
+}
+
+export const postNewDailyTask = (task: IDailyTask):
+  Promise<{ addDailyTask: IDailyTask }> => {
+  // Make id null so backend knows to generate a right id for it
+  // stringifySerialized translates NaNs to null
+  task.id = NaN;
+  return request(apiUrl, genTaskMutationRequest("addDailyTask", task));
+}
+
+export const updateExistingDailyTask = (task: IDailyTask):
+  Promise<{ updateDailyTask: IDailyTask }> => {
+  return request(apiUrl, genTaskMutationRequest("updateDailyTask", task));
+}
+
+export const deleteExistingDailyTask = (task: IDailyTask):
+  Promise<{ deleteDailyTask: IDailyTask }> => {
+  return request(apiUrl, genTaskMutationRequest('deleteDailyTask', task));
 }

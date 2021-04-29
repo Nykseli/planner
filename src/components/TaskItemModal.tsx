@@ -9,7 +9,11 @@ import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppDispatch } from '@/hooks/reduxHooks';
-import { addNewDailyTask, editExistingDailyTask } from '@/data/redux/reducers/currentDate';
+import {
+  addNewDailyTask,
+  editExistingDailyTask,
+  removeExistingDailyTask
+} from '@/data/redux/reducers/currentDate';
 
 type VisibiltyCb = (bool?: boolean) => void;
 type TaskEditCb = (task: IDailyTask) => void;
@@ -217,6 +221,12 @@ const ModalControlButtons = ({ task, visibilityCb }:
   { task: IDailyTask, visibilityCb: VisibiltyCb }) => {
   const [editVisible, setEditVisible] = React.useState<boolean>(false);
 
+  const dispatch = useAppDispatch();
+
+  const deleteTask = () => {
+    dispatch(removeExistingDailyTask(task));
+  }
+
   const changeEditVisiblity = (b?: boolean) => {
     if (b === undefined) {
       setEditVisible(!editVisible);
@@ -249,7 +259,10 @@ const ModalControlButtons = ({ task, visibilityCb }:
             [
               // TODO: onPress functionality
               // TODO: Should delete text be bold and red?
-              { text: "Delete" },
+              {
+                text: "Delete",
+                onPress: () => deleteTask()
+              },
               { text: "Cancel" }
             ]
           )}>

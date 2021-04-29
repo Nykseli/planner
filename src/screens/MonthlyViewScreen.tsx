@@ -15,7 +15,7 @@ import {
   previousMonthWithTasks,
   fetchTasksAsync,
   selectMonthlyTask,
-  TaskMap
+  MonthTaskList
 } from '@/data/redux/reducers/currentMonth';
 import { fromDateInfo } from '@/data/redux/reducers/currentDate';
 import { MVNavigation } from '@/types';
@@ -68,7 +68,7 @@ const DaySquare = ({ navLoad, cdi, cmi, date, taskCount }:
 }
 
 const DateSquares = ({ nav, cdi, cmi, tasks }:
-  { nav: MVNavigation, cdi: DateInfo, cmi: MonthInfo, tasks: TaskMap }) => {
+  { nav: MVNavigation, cdi: DateInfo, cmi: MonthInfo, tasks: MonthTaskList }) => {
 
   const dispatch = useAppDispatch();
 
@@ -94,8 +94,8 @@ const DateSquares = ({ nav, cdi, cmi, tasks }:
   return (
     <View style={styles.squaresContainer}>
       {frontPaddingList}
-      {cmi.dateList().map((date) => {
-        const taskCount = tasks[date]?.taskCount || 0;
+      {cmi.dateList().map((date, idx) => {
+        const taskCount = tasks[idx]?.taskCount || 0;
 
         return <DaySquare
           key={date}
@@ -151,7 +151,7 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
   const cdi = DateInfo.today();
   const dispatch = useAppDispatch();
 
-  let taskMap: TaskMap = {};
+  let taskMap: MonthTaskList = [];
 
   // Load initial task data here.
   // Task loading after this is handled by currentMonth reducer
