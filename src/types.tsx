@@ -19,6 +19,8 @@ export type DailyViewParamList = {
   DailyViewScreen: undefined;
 };
 
+export type PropChildren = React.ReactChild | React.ReactChild[] | React.ReactChildren;
+
 // Special navigation type from https://reactnavigation.org/docs/typescript/
 export type MonthlyViewNavigation = StackScreenProps<RootStackParamList, 'DailyView'>;
 export type MVNavigation = MonthlyViewNavigation['navigation']

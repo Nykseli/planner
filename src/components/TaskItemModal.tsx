@@ -9,19 +9,19 @@ import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt } from '@/util/datetime';
 import { useAppDispatch } from '@/hooks/reduxHooks';
-import { removeDailyFromTasks } from '@/data/redux/reducers/currentMonth';
 import {
   addNewDailyTask,
-  removeDailyTask,
   editExistingDailyTask,
   removeExistingDailyTask,
 } from '@/data/redux/reducers/currentDate';
+import { PropChildren } from '@/types';
+import { showUserAlert } from '@/data/redux/reducers/userAlert';
 
 type VisibiltyCb = (bool?: boolean) => void;
 type TaskEditCb = (task: IDailyTask) => void;
 
 interface ITaskItemModal {
-  children: React.ReactChild | React.ReactChild[] | React.ReactChildren;
+  children: PropChildren;
   task: IDailyTask;
 }
 
@@ -34,7 +34,7 @@ interface IEditTaskItemModal {
 }
 
 interface IFullScreenModalView {
-  children: React.ReactChild | React.ReactChild[] | React.ReactChildren,
+  children: PropChildren;
   visible: boolean,
   visibilityCb: VisibiltyCb,
 }
@@ -69,11 +69,39 @@ const EditControlButtons = ({ task, isNew, visibilityCb }:
   const updateDailyTask = () => {
     if (isNew) {
       dispatch(addNewDailyTask(task, {
-        onSuccess: () => visibilityCb(false)
+        onSuccess: () => {
+          visibilityCb(false);
+          dispatch(showUserAlert({
+            message: 'New daily task added',
+            displayTime: 'short',
+            color: 'info'
+          }));
+        },
+        onFail: () => {
+          dispatch(showUserAlert({
+            message: "Couldn't add new task",
+            displayTime: 'short',
+            color: 'error'
+          }));
+        }
       }));
     } else {
       dispatch(editExistingDailyTask(task, {
-        onSuccess: () => visibilityCb(false)
+        onSuccess: () => {
+          visibilityCb(false);
+          dispatch(showUserAlert({
+            message: 'Daily was edited succesfully',
+            displayTime: 'short',
+            color: 'info'
+          }));
+        },
+        onFail: () => {
+          dispatch(showUserAlert({
+            message: "Couldn't add edit task",
+            displayTime: 'short',
+            color: 'error'
+          }));
+        }
       }));
     }
   }
@@ -234,6 +262,18 @@ const ModalControlButtons = ({ task, visibilityCb }:
     dispatch(removeExistingDailyTask(task, {
       onSuccess: () => {
         visibilityCb(false);
+        dispatch(showUserAlert({
+          message: 'Daily task removed',
+          displayTime: 'short',
+          color: 'info'
+        }));
+      },
+      onFail: () => {
+        dispatch(showUserAlert({
+          message: "Couldn't remove task",
+          displayTime: 'short',
+          color: 'error'
+        }));
       }
     }));
   }

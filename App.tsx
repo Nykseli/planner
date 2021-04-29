@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import useCachedResources from '@/hooks/useCachedResources';
 import useColorScheme from '@/hooks/useColorScheme';
 import Navigation from '@/navigation';
+import UserAlert from '@/components/UserAlert';
 import { store } from '@/data/redux/store'
 
 const App = () => {
@@ -18,8 +19,10 @@ const App = () => {
     return (
       <Provider store={store}>
         <SafeAreaProvider>
-          <Navigation colorScheme={colorScheme} />
-          <StatusBar />
+          <UserAlert>
+            <Navigation colorScheme={colorScheme} />
+            <StatusBar />
+          </UserAlert>
         </SafeAreaProvider>
       </Provider>
     );

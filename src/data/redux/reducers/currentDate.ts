@@ -122,7 +122,6 @@ export const previousDateWithTasks = (): AppThunk => (dispatch, getState) => {
  */
 // TODO: dispatch and getstate types.
 export const addNewDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThunk => (dispatch, getState) => {
-  // TODO: set errors on fail
   postNewDailyTask(task).then((data) => {
     const nTask = data.addDailyTask;
     const cDate = selectDate(getState());
@@ -132,14 +131,11 @@ export const addNewDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThu
 
     dispatch(addDailyTaskToTasks(nTask));
 
-    // TODO: let user know this was a success
     if (cb !== undefined && cb.onSuccess !== undefined)
       cb.onSuccess();
   }).catch((reason) => {
     if (cb !== undefined && cb.onFail !== undefined)
       cb.onFail(reason);
-    // TODO: display an error
-    console.warn(reason);
   });
 }
 
@@ -149,7 +145,6 @@ export const addNewDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThu
  */
 // TODO: dispatch and getstate types.
 export const editExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThunk => (dispatch, getState) => {
-  // TODO: set errors on fail
   updateExistingDailyTask(task).then((data) => {
     const nTask = data.updateDailyTask;
     const cDate = selectDate(getState());
@@ -163,33 +158,26 @@ export const editExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): 
       dispatch(fromDateInfo(nTask.date));
     }
 
-    // TODO: let user know this was a success
     if (cb !== undefined && cb.onSuccess !== undefined)
       cb.onSuccess();
 
   }).catch((reason) => {
     if (cb !== undefined && cb.onFail !== undefined)
       cb.onFail(reason);
-    // TODO: display an error
-    console.warn(reason);
   });
 }
 
 export const removeExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThunk => (dispatch, getState) => {
-  // TODO: set errors on fail
   deleteExistingDailyTask(task).then((data) => {
     const nTask = data.deleteDailyTask;
     dispatch(removeDailyTask(nTask));
     dispatch(removeDailyFromTasks(nTask));
-    // TODO: let user know this was a success
     if (cb !== undefined && cb.onSuccess !== undefined)
       cb.onSuccess();
 
   }).catch((reason) => {
     if (cb !== undefined && cb.onFail !== undefined)
       cb.onFail(reason);
-    // TODO: display an error
-    console.warn(reason);
   });
 }
 
