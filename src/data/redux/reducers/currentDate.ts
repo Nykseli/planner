@@ -77,8 +77,6 @@ export const dateSlice = createSlice({
       state.tasks = action.payload;
     }).addCase(fetchDailyTasksAsync.rejected, (state: CurrentDateState) => {
       state.status = 'failed';
-      // TODO: show networking error to user
-      console.warn("fetchDailyTasksAsync was rejected");
     });
   }
 });

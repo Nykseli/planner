@@ -16,6 +16,7 @@ import {
   fetchDailyTasksAsync,
   selectCurrentDate
 } from '@/data/redux/reducers/currentDate';
+import { showUserAlert } from '@/data/redux/reducers/userAlert';
 
 const singleBoxHeight = 80;
 const dailyHours = Array.from({ length: 24 }, (_v, k) => k);
@@ -88,6 +89,18 @@ const DailyViewScreen = () => {
     // When status is idle, nothing is happening, meaning that
     // we can use the data
     taskList = currentDateState.tasks;
+  } else if (currentDateState.status === 'failed') {
+    // setTimout schedules the function to occur after the current event loop,
+    // outside the current event context that has flags that would otherwise trip console warnings
+    // TODO: fix this the Warning: Cannot update a component from inside the function body of a different component.
+    //       that you get when removing setTimeout wrapper
+    setTimeout(() => {
+      dispatch(showUserAlert({
+        message: "Couldn't fetch daily tasks",
+        color: 'error',
+        displayTime: 'short'
+      }));
+    }, 0);
   }
 
   return (

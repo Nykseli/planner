@@ -72,13 +72,13 @@ export const monthSlice = createSlice({
   extraReducers: (builder: ActionReducerMapBuilder<any>) => {
     builder.addCase(fetchTasksAsync.pending, (state: CurrentMonthState) => {
       state.status = 'loading';
+      // Never show old tasks
+      state.tasks = [];
     }).addCase(fetchTasksAsync.fulfilled, (state: CurrentMonthState, action: PayloadAction<MonthTaskList>) => {
       state.status = 'idle';
       state.tasks = action.payload;
     }).addCase(fetchTasksAsync.rejected, (state: CurrentMonthState) => {
       state.status = 'failed';
-      // TODO: show networking error to user
-      console.warn("fetchTasksAsync was rejected");
     });;
   }
 });

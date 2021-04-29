@@ -19,6 +19,7 @@ import {
 } from '@/data/redux/reducers/currentMonth';
 import { fetchDailyTasksAsync, fromDateInfo } from '@/data/redux/reducers/currentDate';
 import { MVNavigation } from '@/types';
+import { showUserAlert } from '@/data/redux/reducers/userAlert';
 
 type NavigationLoad = (date: DateNum) => void;
 
@@ -162,6 +163,18 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
     // When status is idle, nothing is happening, meaning that
     // we can use the data
     taskMap = montlyTasks.tasks;
+  } else if (montlyTasks.status === 'failed') {
+    // setTimout schedules the function to occur after the current event loop,
+    // outside the current event context that has flags that would otherwise trip console warnings
+    // TODO: fix this the Warning: Cannot update a component from inside the function body of a different component.
+    //       that you get when removing setTimeout wrapper
+    setTimeout(() => {
+      dispatch(showUserAlert({
+        message: "Couldn't fetch monthly tasks",
+        color: 'error',
+        displayTime: 'short'
+      }));
+    }, 0);
   }
 
   return (
