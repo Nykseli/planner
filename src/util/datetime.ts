@@ -19,6 +19,28 @@ export const timeDateFmt = (td: number): string => {
   return `${td < 10 ? '0' + td : td}`;
 }
 
+export const timeDiffString = (date1: Date, date2: Date): string => {
+  const diffSeconds = Math.floor((date2.getTime() - date1.getTime()) / 1000);
+  const days = Math.floor(diffSeconds / 60 / 60 / 24);
+  const hours = Math.floor(diffSeconds / 60 / 60) % 24;
+  const minutes = Math.floor(diffSeconds / 60) % 60;
+  let diffString = "";
+
+  if (days > 0)
+    diffString = `${diffString} ${days} days`;
+
+  if (hours > 0)
+    diffString = `${diffString} ${hours} hours`;
+
+  if (minutes > 0)
+    diffString = `${diffString} ${minutes} minutes`;
+
+  if (diffString === "")
+    return " < minute";
+
+  return diffString;
+}
+
 /**
  * In js Date object, week days are from 0 to 6
  * and WeekNum is 1 to 7

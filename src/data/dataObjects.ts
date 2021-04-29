@@ -72,6 +72,14 @@ export class DateInfo implements IDateInfo, Serializable<IDateInfo> {
     return `${d}.${m}.${date.year}`
   }
 
+  /**
+   * Create a regural js Date object from IDateInfo.
+   */
+  public static toDate(date: IDateInfo, hour?: number, minute?: number): Date {
+    // Javascript maps months 0-11 and we map them 1-12
+    return new Date(date.year, date.month - 1, date.date, hour || 0, minute || 0);
+  }
+
   public static fromDate(date: Date): DateInfo {
     const d = date.getDate() as DateNum;
     const weekday = jsWeekDayToWeekNum(date.getDay());

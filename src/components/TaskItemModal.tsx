@@ -7,7 +7,7 @@ import Colors from '@/constants/Colors';
 import { Text, View } from './Themed';
 import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
-import { timeDateFmt } from '@/util/datetime';
+import { timeDateFmt, timeDiffString } from '@/util/datetime';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import {
   addNewDailyTask,
@@ -18,7 +18,7 @@ import { PropChildren } from '@/types';
 import { showUserAlert } from '@/data/redux/reducers/userAlert';
 
 type VisibiltyCb = (bool?: boolean) => void;
-type TaskEditCb = (task: IDailyTask) => void;
+type TaskEditCb = (task: IDailyTask, startDate: Date) => void;
 
 interface ITaskItemModal {
   children: PropChildren;
@@ -61,8 +61,8 @@ const FullScreenModalView = (props: IFullScreenModalView) => {
  * If the task is new, it will be added to databse.
  * If not, it will be updated.
  */
-const EditControlButtons = ({ task, isNew, visibilityCb }:
-  { task: IDailyTask, isNew: boolean, visibilityCb: VisibiltyCb }) => {
+const EditControlButtons = ({ task, startDate, isNew, visibilityCb }:
+  { task: IDailyTask, startDate: Date, isNew: boolean, visibilityCb: VisibiltyCb }) => {
 
   const dispatch = useAppDispatch();
 
@@ -72,7 +72,7 @@ const EditControlButtons = ({ task, isNew, visibilityCb }:
         onSuccess: () => {
           visibilityCb(false);
           dispatch(showUserAlert({
-            message: 'New daily task added',
+            message: `Tasks starts in: ${timeDiffString(new Date(), startDate)}`,
             displayTime: 'short',
             color: 'info'
           }));
@@ -90,7 +90,7 @@ const EditControlButtons = ({ task, isNew, visibilityCb }:
         onSuccess: () => {
           visibilityCb(false);
           dispatch(showUserAlert({
-            message: 'Daily was edited succesfully',
+            message: `Tasks starts in: ${timeDiffString(new Date(), startDate)}`,
             displayTime: 'short',
             color: 'info'
           }));
@@ -134,11 +134,11 @@ const EditFields = ({ editable, editCb }:
   const [showStartTimePicker, setShowStartTimePicker] = React.useState<boolean>(false);
 
   const onChangeTitle = (text: string) => {
-    editCb({ ...editable, title: text });
+    editCb({ ...editable, title: text }, date);
   }
 
   const onChangeDescription = (text: string) => {
-    editCb({ ...editable, description: text });
+    editCb({ ...editable, description: text }, date);
   }
 
   const onDateChange = (event: Event, selectedDate?: Date) => {
@@ -146,7 +146,7 @@ const EditFields = ({ editable, editCb }:
     setShowDatePicker(Platform.OS === 'ios');
     setDate(currentDate);
     const newDate = DateInfo.fromDate(currentDate).serialize();
-    editCb({ ...editable, date: newDate });
+    editCb({ ...editable, date: newDate }, currentDate);
   }
 
   const onStartTimeChange = (event: Event, selectedDate?: Date) => {
@@ -154,7 +154,7 @@ const EditFields = ({ editable, editCb }:
     setShowStartTimePicker(Platform.OS === 'ios');
     setDate(currentDate);
     // TODO: make sure this is before end time and alert user on the error
-    editCb({ ...editable, startHour: currentDate.getHours(), startMinute: currentDate.getMinutes() });
+    editCb({ ...editable, startHour: currentDate.getHours(), startMinute: currentDate.getMinutes() }, currentDate);
   }
 
   const onEndTimeChange = (event: Event, selectedDate?: Date) => {
@@ -162,7 +162,7 @@ const EditFields = ({ editable, editCb }:
     setShowEndTimePicker(Platform.OS === 'ios');
     setDate(currentDate);
     // TODO: make sure this is after start time and alert user on the error
-    editCb({ ...editable, endHour: currentDate.getHours(), endMinute: currentDate.getMinutes() });
+    editCb({ ...editable, endHour: currentDate.getHours(), endMinute: currentDate.getMinutes() }, currentDate);
   }
 
   const showDatepicker = () => {
@@ -382,17 +382,36 @@ const TaskItemModal = (props: ITaskItemModal) => {
 
 const EditTaskItemModal = (props: IEditTaskItemModal) => {
   const isNew = props.editable === undefined;
+  // Start date refers to the date when the task starts
+  // so editable date + startHour and startMinute
+  const [startDate, setStartDate] = React.useState<Date>(new Date());
   const [editTask, setEditTask] = React.useState<IDailyTask>(
     props.editable || DailyTask.new().serialize()
   );
 
-  const updateEditTask = (task: IDailyTask) => {
+  const updateEditTask = (task: IDailyTask, startDate: Date) => {
     setEditTask(task);
+    setStartDate(startDate);
   }
+
+  // Reset the ediTask everytime the visibilty changes
+  // this way we always have a "clean slate" when creating a new task
+  React.useEffect(() => {
+    if (isNew) {
+      const newTask = DailyTask.new().serialize();
+      setStartDate(DateInfo.toDate(newTask.date, newTask.startHour, newTask.startMinute));
+      setEditTask(DailyTask.new().serialize());
+    } else {
+      // Tell compiler that the editable cannot be undefined at this point
+      const ed = props.editable as IDailyTask;
+      setStartDate(DateInfo.toDate(ed.date, ed.startHour, ed.startMinute));
+      setEditTask(ed);
+    }
+  }, [props.visible]);
 
   return (
     <FullScreenModalView visible={props.visible} visibilityCb={props.visibilityCb}>
-      <EditControlButtons task={editTask} isNew={isNew} visibilityCb={props.visibilityCb} />
+      <EditControlButtons task={editTask} startDate={startDate} isNew={isNew} visibilityCb={props.visibilityCb} />
       <EditFields editable={editTask} editCb={updateEditTask} />
     </FullScreenModalView>
   );
