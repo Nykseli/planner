@@ -153,7 +153,7 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
   const cdi = DateInfo.today();
   const dispatch = useAppDispatch();
 
-  let taskMap: MonthTaskList = [];
+  let taskList: MonthTaskList = [];
 
   // Load initial task data here.
   // Task loading after this is handled by currentMonth reducer
@@ -162,20 +162,24 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
   } else if (montlyTasks.status === 'idle') {
     // When status is idle, nothing is happening, meaning that
     // we can use the data
-    taskMap = montlyTasks.tasks;
-  } else if (montlyTasks.status === 'failed') {
-    // setTimout schedules the function to occur after the current event loop,
-    // outside the current event context that has flags that would otherwise trip console warnings
-    // TODO: fix this the Warning: Cannot update a component from inside the function body of a different component.
-    //       that you get when removing setTimeout wrapper
-    setTimeout(() => {
+    taskList = montlyTasks.tasks;
+  } else {
+    taskList = [];
+  }
+
+  // showUseAlert changes the contents of UserAlert module
+  // so we need to dispatch it in useEffect
+  // other dispatches should be here too, but this way we have
+  // the most interactive renders
+  React.useEffect(() => {
+    if (montlyTasks.status === 'failed') {
       dispatch(showUserAlert({
         message: "Couldn't fetch monthly tasks",
         color: 'error',
         displayTime: 'short'
       }));
-    }, 0);
-  }
+    }
+  }, [montlyTasks]);
 
   return (
     <View style={styles.monthContainer}>
@@ -192,7 +196,7 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
       </View>
       <View style={styles.dateSquareContainer}>
         <DayNames />
-        <DateSquares nav={navigation} cdi={cdi} cmi={cmi} tasks={taskMap} />
+        <DateSquares nav={navigation} cdi={cdi} cmi={cmi} tasks={taskList} />
       </View>
       <AddItemButton />
     </View>
