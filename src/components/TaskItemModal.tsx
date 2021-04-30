@@ -1,10 +1,9 @@
 import React from 'react';
-import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
-import { Alert, StyleSheet, Modal, Platform, Pressable, TextInput } from 'react-native';
+import { Alert, StyleSheet, Modal, Platform, Pressable } from 'react-native';
 import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
 
 import Colors from '@/constants/Colors';
-import { Text, View } from './Themed';
+import { Text, View, TextInput, AntDesign, Feather, MaterialIcons } from './Themed';
 import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt, timeDiffString } from '@/util/datetime';
@@ -492,7 +491,6 @@ const styles = StyleSheet.create({
   modalView: {
     width: Layout.screen.width,
     height: Layout.screen.height,
-    backgroundColor: "white",
     // TODO: make sure that all the items are visible with safe views etc
     paddingTop: 20,
     paddingLeft: 15,

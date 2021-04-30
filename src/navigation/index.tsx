@@ -1,7 +1,6 @@
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as React from 'react';
-import { ColorSchemeName } from 'react-native';
 
 import NotFoundScreen from '@/screens/NotFoundScreen';
 import { RootStackParamList } from '@/types';
@@ -12,12 +11,19 @@ import {
   SettingsScreenNavigator,
   LanguageSelectionNavigator
 } from './SettingsNavigator';
+import { useAppSelector } from '@/hooks/reduxHooks';
+import { selectTheme } from '@/data/redux/reducers/theme';
+import useColorScheme from '@/hooks/useColorScheme';
 
-const Navigation = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
+const Navigation = () => {
+  const sTheme = useColorScheme();
+  const uTheme = useAppSelector(selectTheme);
+  const theme = uTheme !== 'default' ? uTheme : sTheme;
+
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
-      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      theme={theme === 'dark' ? DarkTheme : DefaultTheme}>
       <RootNavigator />
     </NavigationContainer>
   );

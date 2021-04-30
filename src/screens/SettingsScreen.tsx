@@ -5,6 +5,8 @@ import { Pressable, StyleSheet } from 'react-native';
 import { View, Text } from '@/components/Themed'
 import { MVNavigation } from '@/types';
 import Layout from '@/constants/Layout';
+import { useAppDispatch } from '@/hooks/reduxHooks';
+import { useDarkTheme, useDefaultTheme, useLightTheme } from '@/data/redux/reducers/theme';
 
 type SelecetedCb = (opionIdx: number) => void;
 
@@ -39,10 +41,23 @@ export const LanguageSelection = () => {
 }
 
 export const StyleSelection = () => {
-  const styles = ['dark', 'light'];
+  const dispatch = useAppDispatch();
+  const styles = ['dark', 'light', 'default'];
 
   const selected = (idx: number) => {
-    console.log('Selected: ' + styles[idx]);
+    switch (idx) {
+      case 0:
+        dispatch(useDarkTheme());
+        break;
+      case 1:
+        dispatch(useLightTheme());
+        break;
+      case 2:
+        dispatch(useDefaultTheme());
+        break;
+      default:
+        break;
+    }
   }
 
   return (

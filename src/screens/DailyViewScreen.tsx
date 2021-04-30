@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { StyleSheet, SafeAreaView, ScrollView, Pressable } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
-import { Text, View } from '@/components/Themed';
+import { Text, View, MaterialIcons } from '@/components/Themed';
 import { TaskItemModal } from '@/components/TaskItemModal'
 import AddItemButton from '@/components/AddItemButton';
 import Layout from '@/constants/Layout';

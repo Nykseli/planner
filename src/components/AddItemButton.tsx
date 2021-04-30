@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 import Colors from '@/constants/Colors'
+import { Ionicons } from '@/components/Themed';
 import { EditTaskItemModal } from '@/components/TaskItemModal'
 
 const AddItemButton = () => {
