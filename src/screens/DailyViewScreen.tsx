@@ -104,11 +104,11 @@ const DailyViewScreen = () => {
     <View style={styles.container}>
       <View style={styles.dateNavigation}>
         <Pressable onPress={() => dispatch(previousDateWithTasks())}>
-          <MaterialIcons name="navigate-before" size={35} color="black" />
+          <MaterialIcons name="navigate-before" size={35} />
         </Pressable>
         <Text style={styles.title}>{DateInfo.toString(currentDate)}</Text>
         <Pressable onPress={() => dispatch(nextDateWithTasks())}>
-          <MaterialIcons name="navigate-next" size={35} color="black" />
+          <MaterialIcons name="navigate-next" size={35} />
         </Pressable>
       </View>
       <SafeAreaView style={styles.scrollContainer}>

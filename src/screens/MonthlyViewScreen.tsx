@@ -187,10 +187,10 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
       </View>
       <View style={styles.dateNavigation}>
         <Pressable onPress={() => dispatch(previousMonthWithTasks())}>
-          <MaterialIcons name="navigate-before" size={35} color="black" />
+          <MaterialIcons name="navigate-before" size={35} />
         </Pressable>
         <Pressable onPress={() => dispatch(nextMonthWithTasks())}>
-          <MaterialIcons name="navigate-next" size={35} color="black" />
+          <MaterialIcons name="navigate-next" size={35} />
         </Pressable>
       </View>
       <View style={styles.dateSquareContainer}>
