@@ -4,6 +4,9 @@ export type RootStackParamList = {
   Root: undefined;
   DailyView: undefined;
   NotFound: undefined;
+  Settings: undefined;
+  LanguageSelection: undefined;
+  StyleSelection: undefined;
 };
 
 export type BottomTabParamList = {
@@ -18,6 +21,18 @@ export type MonthlyViewParamList = {
 export type DailyViewParamList = {
   DailyViewScreen: undefined;
 };
+
+export type SettingsScreenParamList = {
+  Settings: undefined;
+}
+
+export type LanguageSelectionParamList = {
+  LanguageSelection: undefined;
+}
+
+export type StyleSelectionParamList = {
+  StyleSelection: undefined;
+}
 
 export type PropChildren = React.ReactChild | React.ReactChild[] | React.ReactChildren;
 

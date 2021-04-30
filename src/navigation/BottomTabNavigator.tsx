@@ -13,6 +13,7 @@ import useColorScheme from '@/hooks/useColorScheme';
 import MonthlyViewScreen from '@/screens/MonthlyViewScreen';
 import DailyViewScreen from '@/screens/DailyViewScreen';
 import { BottomTabParamList, MonthlyViewParamList, DailyViewParamList } from '@/types';
+import NavigationHeader from '@/components/NavigationHeader';
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -57,7 +58,7 @@ const MonthlyViewNavigator = () => {
       <MonthlyViewStack.Screen
         name="MonthlyViewScreen"
         component={MonthlyViewScreen}
-        options={{ headerTitle: 'Monthly View' }}
+        options={{ headerTitle: () => <NavigationHeader text="Monthly View" /> }}
       />
     </MonthlyViewStack.Navigator>
   );
@@ -71,7 +72,7 @@ const DailyViewNavigator = () => {
       <DailyViewStack.Screen
         name="DailyViewScreen"
         component={DailyViewScreen}
-        options={{ headerTitle: 'Daily View' }}
+        options={{ headerTitle: () => <NavigationHeader text="Daily View" /> }}
       />
     </DailyViewStack.Navigator>
   );

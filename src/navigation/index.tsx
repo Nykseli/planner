@@ -7,6 +7,11 @@ import NotFoundScreen from '@/screens/NotFoundScreen';
 import { RootStackParamList } from '@/types';
 import BottomTabNavigator from './BottomTabNavigator';
 import LinkingConfiguration from './LinkingConfiguration';
+import {
+  StyleSelectionNavigator,
+  SettingsScreenNavigator,
+  LanguageSelectionNavigator
+} from './SettingsNavigator';
 
 const Navigation = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
   return (
@@ -24,6 +29,9 @@ const RootNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Root" component={BottomTabNavigator} />
+      <Stack.Screen name="Settings" component={SettingsScreenNavigator} />
+      <Stack.Screen name="StyleSelection" component={StyleSelectionNavigator} />
+      <Stack.Screen name="LanguageSelection" component={LanguageSelectionNavigator} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
     </Stack.Navigator>
   );
