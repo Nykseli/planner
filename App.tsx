@@ -4,14 +4,15 @@ import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import useCachedResources from '@/hooks/useCachedResources';
-import useColorScheme from '@/hooks/useColorScheme';
 import Navigation from '@/navigation';
 import UserAlert from '@/components/UserAlert';
 import { store } from '@/data/redux/store'
+import { initNotificationBackgroundTask, initNotificationForegroundTask } from '@/util/notifications';
 
 const App = () => {
   const isLoadingComplete = useCachedResources();
-  const colorScheme = useColorScheme();
+  initNotificationBackgroundTask();
+  initNotificationForegroundTask();
 
   if (!isLoadingComplete) {
     return null;
@@ -20,7 +21,7 @@ const App = () => {
       <Provider store={store}>
         <SafeAreaProvider>
           <UserAlert>
-            <Navigation colorScheme={colorScheme} />
+            <Navigation />
             <StatusBar />
           </UserAlert>
         </SafeAreaProvider>

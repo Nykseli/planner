@@ -5,6 +5,7 @@ import { DateInfo, IDailyTask, IDateInfo } from '@/data/dataObjects';
 import { fetchDailyTasks, postNewDailyTask, updateExistingDailyTask, deleteExistingDailyTask } from '@/data/api';
 import { addDailyTaskToTasks, removeDailyFromTasks } from './currentMonth'
 import { ReducerCallBacks } from '@/types';
+import { addOrUpdateNotification, setNotifications } from '@/util/notifications';
 
 export interface CurrentDateState {
   date: IDateInfo;
@@ -75,6 +76,8 @@ export const dateSlice = createSlice({
     }).addCase(fetchDailyTasksAsync.fulfilled, (state: CurrentDateState, action: PayloadAction<IDailyTask[]>) => {
       state.status = 'idle';
       state.tasks = action.payload;
+      // Setting notifications (util/notifications.ts)
+      setNotifications(action.payload);
     }).addCase(fetchDailyTasksAsync.rejected, (state: CurrentDateState) => {
       state.status = 'failed';
     });
@@ -127,6 +130,9 @@ export const addNewDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThu
       dispatch(addDailyTask(nTask));
     }
 
+    // Updating notifications (util/notifications.ts)
+    addOrUpdateNotification(nTask);
+
     dispatch(addDailyTaskToTasks(nTask));
 
     if (cb !== undefined && cb.onSuccess !== undefined)
@@ -146,6 +152,10 @@ export const editExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): 
   updateExistingDailyTask(task).then((data) => {
     const nTask = data.updateDailyTask;
     const cDate = selectDate(getState());
+
+    // Updating notifications (util/notifications.ts)
+    addOrUpdateNotification(nTask);
+
     // TODO: also update and remove the task from monthly tasks
     if (DateInfo.equal(cDate, nTask.date)) {
       dispatch(updateDailyTask(nTask));
@@ -168,8 +178,13 @@ export const editExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): 
 export const removeExistingDailyTask = (task: IDailyTask, cb?: ReducerCallBacks): AppThunk => (dispatch, getState) => {
   deleteExistingDailyTask(task).then((data) => {
     const nTask = data.deleteDailyTask;
+
+    // Updating notifications (util/notifications.ts)
+    addOrUpdateNotification(nTask);
+
     dispatch(removeDailyTask(nTask));
     dispatch(removeDailyFromTasks(nTask));
+
     if (cb !== undefined && cb.onSuccess !== undefined)
       cb.onSuccess();
 
