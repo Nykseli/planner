@@ -7,7 +7,7 @@ import { Text, View, TextInput, AntDesign, Feather, MaterialIcons } from './Them
 import Layout from '@/constants/Layout';
 import { DailyTask, DateInfo, IDailyTask } from '@/data/dataObjects';
 import { timeDateFmt, timeDiffString } from '@/util/datetime';
-import { useAppDispatch } from '@/hooks/reduxHooks';
+import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks';
 import {
   addNewDailyTask,
   editExistingDailyTask,
@@ -15,6 +15,7 @@ import {
 } from '@/data/redux/reducers/currentDate';
 import { PropChildren } from '@/types';
 import { showUserAlert } from '@/data/redux/reducers/userAlert';
+import { selectLocale } from '@/data/redux/reducers/locale';
 
 type VisibiltyCb = (bool?: boolean) => void;
 type TaskEditCb = (task: IDailyTask, startDate: Date) => void;
@@ -64,6 +65,7 @@ const EditControlButtons = ({ task, startDate, isNew, visibilityCb }:
   { task: IDailyTask, startDate: Date, isNew: boolean, visibilityCb: VisibiltyCb }) => {
 
   const dispatch = useAppDispatch();
+  const locale = useAppSelector(selectLocale);
 
   const updateDailyTask = () => {
     if (isNew) {
@@ -71,14 +73,14 @@ const EditControlButtons = ({ task, startDate, isNew, visibilityCb }:
         onSuccess: () => {
           visibilityCb(false);
           dispatch(showUserAlert({
-            message: `Tasks starts in: ${timeDiffString(new Date(), startDate)}`,
-            displayTime: 'short',
+            message: `${locale.info.taskStartsIn}: ${timeDiffString(new Date(), startDate, locale)}`,
+            displayTime: 'long',
             color: 'info'
           }));
         },
         onFail: () => {
           dispatch(showUserAlert({
-            message: "Couldn't add new task",
+            message: locale.info.taskAddFail,
             displayTime: 'short',
             color: 'error'
           }));
@@ -89,15 +91,15 @@ const EditControlButtons = ({ task, startDate, isNew, visibilityCb }:
         onSuccess: () => {
           visibilityCb(false);
           dispatch(showUserAlert({
-            message: `Tasks starts in: ${timeDiffString(new Date(), startDate)}`,
+            message: `${locale.info.taskStartsIn}: ${timeDiffString(new Date(), startDate, locale)}`,
             displayTime: 'short',
             color: 'info'
           }));
         },
         onFail: () => {
           dispatch(showUserAlert({
-            message: "Couldn't add edit task",
-            displayTime: 'short',
+            message: locale.info.taskEditFail,
+            displayTime: 'long',
             color: 'error'
           }));
         }
@@ -256,20 +258,21 @@ const ModalControlButtons = ({ task, visibilityCb }:
   const [editVisible, setEditVisible] = React.useState<boolean>(false);
 
   const dispatch = useAppDispatch();
+  const locale = useAppSelector(selectLocale);
 
   const deleteTask = () => {
     dispatch(removeExistingDailyTask(task, {
       onSuccess: () => {
         visibilityCb(false);
         dispatch(showUserAlert({
-          message: 'Daily task removed',
+          message: locale.info.dailyTaskRemoved,
           displayTime: 'short',
           color: 'info'
         }));
       },
       onFail: () => {
         dispatch(showUserAlert({
-          message: "Couldn't remove task",
+          message: locale.info.dailyTaskRemoveFail,
           displayTime: 'short',
           color: 'error'
         }));
@@ -304,16 +307,16 @@ const ModalControlButtons = ({ task, visibilityCb }:
         <Pressable
           style={styles.controlButton}
           onPress={() => Alert.alert(
-            "Delete task?",
-            "This deletion cannot be reversed",
+            locale.instruction.deleteTask,
+            locale.instruction.deletionWarning,
             [
               // TODO: onPress functionality
               // TODO: Should delete text be bold and red?
               {
-                text: "Delete",
+                text: locale.instruction.delete,
                 onPress: () => deleteTask()
               },
-              { text: "Cancel" }
+              { text: locale.instruction.cancel }
             ]
           )}>
           <AntDesign name="delete" size={34} />

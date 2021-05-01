@@ -5,8 +5,9 @@ import { Pressable, StyleSheet } from 'react-native';
 import { View, Text } from '@/components/Themed'
 import { MVNavigation } from '@/types';
 import Layout from '@/constants/Layout';
-import { useAppDispatch } from '@/hooks/reduxHooks';
+import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks';
 import { useDarkTheme, useDefaultTheme, useLightTheme } from '@/data/redux/reducers/theme';
+import { selectLocale, useEnLocale, useFiLocale } from '@/data/redux/reducers/locale';
 
 type SelecetedCb = (opionIdx: number) => void;
 
@@ -17,7 +18,7 @@ const OptionLines = ({ optionList, onSelect }:
     <View style={styles.optionsContainer}>
       {optionList.map((option, idx) => {
         return (
-          <Pressable onPress={() => onSelect(idx)}>
+          <Pressable key={idx} onPress={() => onSelect(idx)}>
             <View style={styles.optionLine}>
               <Text style={styles.optionLineText}>{option}</Text>
             </View>
@@ -29,10 +30,21 @@ const OptionLines = ({ optionList, onSelect }:
 }
 
 export const LanguageSelection = () => {
-  const langauges = ['English', 'Finnish'];
+  const locale = useAppSelector(selectLocale).settings;
+  const dispatch = useAppDispatch();
+  const langauges = [locale.languageEn, locale.languageFi];
 
   const selected = (idx: number) => {
-    console.log('Selected: ' + langauges[idx]);
+    switch (idx) {
+      case 0:
+        dispatch(useEnLocale());
+        break;
+      case 1:
+        dispatch(useFiLocale());
+        break;
+      default:
+        break;
+    }
   }
 
   return (
@@ -41,8 +53,9 @@ export const LanguageSelection = () => {
 }
 
 export const StyleSelection = () => {
+  const locale = useAppSelector(selectLocale).settings;
   const dispatch = useAppDispatch();
-  const styles = ['dark', 'light', 'default'];
+  const styles = [locale.styleDark, locale.styleLight, locale.styleDefault];
 
   const selected = (idx: number) => {
     switch (idx) {
@@ -66,16 +79,18 @@ export const StyleSelection = () => {
 }
 
 export const SettingsScreen = ({ navigation }: { navigation: MVNavigation }) => {
+  const locale = useAppSelector(selectLocale).ui;
+
   return (
     <View style={styles.optionsContainer}>
       <Pressable onPress={() => navigation.push('StyleSelection')} >
         <View style={styles.optionLine}>
-          <Text style={styles.optionLineText}>Select a style</Text>
+          <Text style={styles.optionLineText}>{locale.styleSelection}</Text>
         </View>
       </Pressable>
       <Pressable onPress={() => navigation.push('LanguageSelection')} >
         <View style={styles.optionLine}>
-          <Text style={styles.optionLineText}>Select a language</Text>
+          <Text style={styles.optionLineText}>{locale.languageSelection}</Text>
         </View>
       </Pressable>
     </View>

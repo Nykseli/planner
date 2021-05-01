@@ -4,13 +4,15 @@ import dateReducer from '@/data/redux/reducers/currentDate'
 import monthReducer from '@/data/redux/reducers/currentMonth'
 import alertReducer from '@/data/redux/reducers/userAlert'
 import themeReducer from '@/data/redux/reducers/theme'
+import localeReducer from '@/data/redux/reducers/locale'
 
 export const store = configureStore({
   reducer: {
     currentDate: dateReducer,
     currentMonth: monthReducer,
     userAlert: alertReducer,
-    theme: themeReducer
+    theme: themeReducer,
+    locale: localeReducer
   }
 });
 

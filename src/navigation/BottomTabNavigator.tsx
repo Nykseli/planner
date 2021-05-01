@@ -14,11 +14,14 @@ import MonthlyViewScreen from '@/screens/MonthlyViewScreen';
 import DailyViewScreen from '@/screens/DailyViewScreen';
 import { BottomTabParamList, MonthlyViewParamList, DailyViewParamList } from '@/types';
 import NavigationHeader from '@/components/NavigationHeader';
+import { useAppSelector } from '@/hooks/reduxHooks';
+import { selectLocale } from '@/data/redux/reducers/locale';
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator = () => {
   const colorScheme = useColorScheme();
+  const locale = useAppSelector(selectLocale).ui;
 
   return (
     <BottomTab.Navigator
@@ -29,6 +32,7 @@ const BottomTabNavigator = () => {
         component={DailyViewNavigator}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+          tabBarLabel: locale.dailyView
         }}
       />
       <BottomTab.Screen
@@ -36,6 +40,7 @@ const BottomTabNavigator = () => {
         component={MonthlyViewNavigator}
         options={{
           tabBarIcon: ({ color }) => <TabBarIcon name="ios-code" color={color} />,
+          tabBarLabel: locale.monthlyView
         }}
       />
     </BottomTab.Navigator>
@@ -53,13 +58,15 @@ const TabBarIcon = (props: { name: React.ComponentProps<typeof Ionicons>['name']
 const MonthlyViewStack = createStackNavigator<MonthlyViewParamList>();
 
 const MonthlyViewNavigator = () => {
+  const locale = useAppSelector(selectLocale).ui;
+
   return (
     <MonthlyViewStack.Navigator>
       <MonthlyViewStack.Screen
         name="MonthlyViewScreen"
         component={MonthlyViewScreen}
-        options={{ headerTitle: () => <NavigationHeader text="Monthly View" /> }}
-      />
+        options={{ headerTitle: () => <NavigationHeader text={locale.monthlyView} /> }}
+        />
     </MonthlyViewStack.Navigator>
   );
 }
@@ -67,12 +74,14 @@ const MonthlyViewNavigator = () => {
 const DailyViewStack = createStackNavigator<DailyViewParamList>();
 
 const DailyViewNavigator = () => {
+  const locale = useAppSelector(selectLocale).ui;
+
   return (
     <DailyViewStack.Navigator>
       <DailyViewStack.Screen
         name="DailyViewScreen"
         component={DailyViewScreen}
-        options={{ headerTitle: () => <NavigationHeader text="Daily View" /> }}
+        options={{ headerTitle: () => <NavigationHeader text={locale.dailyView} /> }}
       />
     </DailyViewStack.Navigator>
   );

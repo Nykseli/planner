@@ -11,16 +11,20 @@ import {
   StyleSelectionParamList
 } from '@/types';
 import { LanguageSelection, SettingsScreen, StyleSelection } from '@/screens/SettingsScreen';
+import { useAppSelector } from '@/hooks/reduxHooks';
+import { selectLocale } from '@/data/redux/reducers/locale';
 
 
 const SettingsStack = createStackNavigator<SettingsScreenParamList>();
 export const SettingsScreenNavigator = () => {
+  const locale = useAppSelector(selectLocale).ui;
+
   return (
     <SettingsStack.Navigator>
       <SettingsStack.Screen
         name='Settings'
         component={SettingsScreen}
-        options={{ headerTitle: "Settings" }}
+        options={{ headerTitle: locale.settings }}
       />
     </SettingsStack.Navigator>
   );
@@ -28,12 +32,14 @@ export const SettingsScreenNavigator = () => {
 
 const LanguageSelectionStack = createStackNavigator<LanguageSelectionParamList>();
 export const LanguageSelectionNavigator = () => {
+  const locale = useAppSelector(selectLocale).ui;
+
   return (
     <LanguageSelectionStack.Navigator>
       <LanguageSelectionStack.Screen
         name='LanguageSelection'
         component={LanguageSelection}
-        options={{ headerTitle: "Language selection" }}
+        options={{ headerTitle: locale.languageSelection }}
       />
     </LanguageSelectionStack.Navigator>
   );
@@ -41,12 +47,14 @@ export const LanguageSelectionNavigator = () => {
 
 const StyleSelectionStack = createStackNavigator<StyleSelectionParamList>();
 export const StyleSelectionNavigator = () => {
+  const locale = useAppSelector(selectLocale).ui;
+
   return (
     <StyleSelectionStack.Navigator>
       <StyleSelectionStack.Screen
         name='StyleSelection'
         component={StyleSelection}
-        options={{ headerTitle: "Style selection" }}
+        options={{ headerTitle: locale.styleSelection }}
       />
     </StyleSelectionStack.Navigator>
   );

@@ -19,6 +19,7 @@ import {
 import { fetchDailyTasksAsync, fromDateInfo } from '@/data/redux/reducers/currentDate';
 import { MVNavigation } from '@/types';
 import { showUserAlert } from '@/data/redux/reducers/userAlert';
+import { selectLocale } from '@/data/redux/reducers/locale';
 
 type NavigationLoad = (date: DateNum) => void;
 
@@ -112,29 +113,59 @@ const DateSquares = ({ nav, cdi, cmi, tasks }:
 }
 
 const DayNames = () => {
-  // TODO: i18n
-  const names = ['ma', 'ti', 'ke', 'to', 'pe', 'la', 'su'];
+  const locale = useAppSelector(selectLocale).locale;
+  const names = [
+    locale.shortMonday,
+    locale.shortTuesday,
+    locale.shortWednesday,
+    locale.shortThursday,
+    locale.shortFriday,
+    locale.shortSaturday,
+    locale.shortSunday
+  ];
 
   return (
     <View style={styles.squaresContainer}>
-      {names.map((dName) => <Text key={dName} style={styles.dayText}>{dName}</Text>)}
+      {names.map((dName, idx) => <Text key={idx} style={styles.dayText}>{dName}</Text>)}
     </View>
   );
 }
 
 const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
-  // TODO: i18n
-  const days = ['Maanantai', 'Tiistai', 'Keskiviikko', 'Torstai', 'Perjantai', 'Lauantai', 'Sunnuntai'];
-  const months = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+  const locale = useAppSelector(selectLocale).locale;
+  const days = [
+    locale.monday,
+    locale.tuesday,
+    locale.wednesday,
+    locale.thursday,
+    locale.friday,
+    locale.saturday,
+    locale.sunday
+  ];
+  const months = [
+    locale.january,
+    locale.february,
+    locale.march,
+    locale.april,
+    locale.may,
+    locale.june,
+    locale.july,
+    locale.august,
+    locale.september,
+    locale.october,
+    locale.novemeber,
+    locale.december
+  ];
+
   let dateNums;
   let dateStr;
 
   if (cdi.month === cmi.month && cdi.year === cmi.year) {
     dateNums = `${timeDateFmt(cdi.date)}.${timeDateFmt(cdi.month)}.${cdi.year}`;
-    dateStr = `${days[cdi.weekday - 1]}, ${months[cdi.month - 1]}kuu`;
+    dateStr = `${days[cdi.weekday - 1]}, ${months[cdi.month - 1]}`;
   } else {
     dateNums = `${timeDateFmt(cmi.month)}.${cmi.year}`;
-    dateStr = `${months[cmi.month - 1]}kuu`;
+    dateStr = `${months[cmi.month - 1]}`;
   }
 
   return (
@@ -146,6 +177,7 @@ const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
 }
 
 const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
+  const locale = useAppSelector(selectLocale).info;
   const selectedMonth = useAppSelector(selectMonth);
   const montlyTasks = useAppSelector(selectMonthlyTask);
   const cmi = MonthInfo.deSerialize(selectedMonth);
@@ -173,7 +205,7 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
   React.useEffect(() => {
     if (montlyTasks.status === 'failed') {
       dispatch(showUserAlert({
-        message: "Couldn't fetch monthly tasks",
+        message: locale.monthlyTaskFetchError,
         color: 'error',
         displayTime: 'short'
       }));

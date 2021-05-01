@@ -1,3 +1,4 @@
+import { AppLocale } from "./i18n/locale";
 
 // Number representation of dates in month
 export type DateNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31;
@@ -19,24 +20,34 @@ export const timeDateFmt = (td: number): string => {
   return `${td < 10 ? '0' + td : td}`;
 }
 
-export const timeDiffString = (date1: Date, date2: Date): string => {
+export const timeDiffString = (date1: Date, date2: Date, locale: AppLocale): string => {
   const diffSeconds = Math.floor((date2.getTime() - date1.getTime()) / 1000);
   const days = Math.floor(diffSeconds / 60 / 60 / 24);
   const hours = Math.floor(diffSeconds / 60 / 60) % 24;
   const minutes = Math.floor(diffSeconds / 60) % 60;
   let diffString = "";
+  const local = locale.locale;
 
   if (days > 0)
-    diffString = `${diffString} ${days} days`;
+    if (days === 1)
+      diffString = `${diffString} ${days} ${local.day}`;
+    else
+      diffString = `${diffString} ${days} ${local.days}`;
 
   if (hours > 0)
-    diffString = `${diffString} ${hours} hours`;
+    if (hours === 1)
+      diffString = `${diffString} ${hours} ${local.hour}`;
+    else
+      diffString = `${diffString} ${hours} ${local.hours}`;
 
   if (minutes > 0)
-    diffString = `${diffString} ${minutes} minutes`;
+    if (minutes === 1)
+      diffString = `${diffString} ${minutes} ${local.minute}`;
+    else
+      diffString = `${diffString} ${minutes} ${local.minutes}`;
 
   if (diffString === "")
-    return " < minute";
+    return ` < ${local.minute}`;
 
   return diffString;
 }

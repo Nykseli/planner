@@ -16,6 +16,7 @@ import {
   selectCurrentDate
 } from '@/data/redux/reducers/currentDate';
 import { showUserAlert } from '@/data/redux/reducers/userAlert';
+import { selectLocale } from '@/data/redux/reducers/locale';
 
 const singleBoxHeight = 80;
 const dailyHours = Array.from({ length: 24 }, (_v, k) => k);
@@ -74,6 +75,7 @@ const ScrollItems = ({ tasks }: { tasks: IDailyTask[] }) => {
 }
 
 const DailyViewScreen = () => {
+  const locale = useAppSelector(selectLocale).info;
   const currentDateState = useAppSelector(selectCurrentDate);
   const currentDate = currentDateState.date;
   const dispatch = useAppDispatch();
@@ -90,7 +92,7 @@ const DailyViewScreen = () => {
       setTaskList(currentDateState.tasks);
     } else if (currentDateState.status === 'failed') {
       dispatch(showUserAlert({
-        message: "Couldn't fetch daily tasks",
+        message: locale.dailyTaskFetchError,
         color: 'error',
         displayTime: 'short'
       }));
