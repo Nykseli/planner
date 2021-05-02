@@ -132,6 +132,7 @@ const DayNames = () => {
 }
 
 const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
+  const dispatch = useAppDispatch();
   const locale = useAppSelector(selectLocale).locale;
   const days = [
     locale.monday,
@@ -170,8 +171,20 @@ const DateInfoView = ({ cdi, cmi }: { cdi: DateInfo, cmi: MonthInfo }) => {
 
   return (
     <View style={styles.monthInfoContainer}>
-      <Text style={styles.monthInfoText}>{dateNums}</Text>
-      <Text style={styles.monthInfoText}>{dateStr}</Text>
+      <View>
+        <Pressable onPress={() => dispatch(previousMonthWithTasks())}>
+          <MaterialIcons name="navigate-before" size={55} />
+        </Pressable>
+      </View>
+      <View>
+        <Text style={styles.monthInfoText}>{dateNums}</Text>
+        <Text style={styles.monthInfoText}>{dateStr}</Text>
+      </View>
+      <View>
+        <Pressable onPress={() => dispatch(nextMonthWithTasks())}>
+          <MaterialIcons name="navigate-next" size={55} />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -214,17 +227,7 @@ const MonthlyViewScreen = ({ navigation }: { navigation: MVNavigation }) => {
 
   return (
     <View style={styles.monthContainer}>
-      <View style={styles.dateInfoContainer}>
-        <DateInfoView cdi={cdi} cmi={cmi} />
-      </View>
-      <View style={styles.dateNavigation}>
-        <Pressable onPress={() => dispatch(previousMonthWithTasks())}>
-          <MaterialIcons name="navigate-before" size={35} />
-        </Pressable>
-        <Pressable onPress={() => dispatch(nextMonthWithTasks())}>
-          <MaterialIcons name="navigate-next" size={35} />
-        </Pressable>
-      </View>
+      <DateInfoView cdi={cdi} cmi={cmi} />
       <View style={styles.dateSquareContainer}>
         <DayNames />
         <DateSquares nav={navigation} cdi={cdi} cmi={cmi} tasks={taskList} />
@@ -279,12 +282,6 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
     borderTopWidth: 0,
   },
-  dateInfoContainer: {
-    flex: 1.0,
-    alignContent: 'center',
-    flexDirection: 'column',
-    flexWrap: 'wrap'
-  },
   dateSquareContainer: {
     flex: 3.0,
     flexDirection: 'column'
@@ -298,11 +295,17 @@ const styles = StyleSheet.create({
   },
   monthInfoContainer: {
     flex: 1,
+    width: Layout.screen.width,
+    alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    /*
+     */
   },
   monthInfoText: {
     textAlign: 'center',
-    fontSize: Layout.window.width * 0.08
+    //fontSize: Layout.window.width * 0.08
+    fontSize: 32
   },
   squaresContainer: {
     flexDirection: 'row',
