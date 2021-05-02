@@ -5,7 +5,6 @@ import * as React from 'react';
 import NotFoundScreen from '@/screens/NotFoundScreen';
 import { RootStackParamList } from '@/types';
 import BottomTabNavigator from './BottomTabNavigator';
-import LinkingConfiguration from './LinkingConfiguration';
 import {
   StyleSelectionNavigator,
   SettingsScreenNavigator,
@@ -22,7 +21,6 @@ const Navigation = () => {
 
   return (
     <NavigationContainer
-      linking={LinkingConfiguration}
       theme={theme === 'dark' ? DarkTheme : DefaultTheme}>
       <RootNavigator />
     </NavigationContainer>
