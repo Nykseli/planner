@@ -13,17 +13,23 @@ import {
 import { useAppSelector } from '@/hooks/reduxHooks';
 import { selectTheme } from '@/data/redux/reducers/theme';
 import useColorScheme from '@/hooks/useColorScheme';
+import { View } from '@/components/Themed';
 
 const Navigation = () => {
   const sTheme = useColorScheme();
   const uTheme = useAppSelector(selectTheme);
   const theme = uTheme !== 'default' ? uTheme : sTheme;
+  const selectedTheme = theme === 'dark' ? DarkTheme : DefaultTheme;
 
   return (
-    <NavigationContainer
-      theme={theme === 'dark' ? DarkTheme : DefaultTheme}>
-      <RootNavigator />
-    </NavigationContainer>
+    // Wrapping NavigationContainer inside of view with backgroundColor
+    // gets rid of white flickering when navigating while in dark mode
+    <View style={{flex: 1, backgroundColor: selectedTheme.colors.background}}>
+      <NavigationContainer
+        theme={selectedTheme}>
+        <RootNavigator />
+      </NavigationContainer>
+    </View>
   );
 }
 
